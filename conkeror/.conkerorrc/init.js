@@ -102,6 +102,7 @@ if ('@hyperstruct.net/mozlab/mozrepl;1' in Cc) {
     mozrepl.start(4243);
 }
 
-add_hook('create_buffer_hook_late', function(buffer) {
-   browser_zoom_set(buffer, true, 150);
-});
+function my_zoom_set (buffer) {
+    browser_zoom_set(buffer, true, 150);
+}
+add_hook('create_buffer_late_hook', my_zoom_set);
