@@ -1,0 +1,14 @@
+[user]
+	name = Eike Kettner
+	email = eike.kettner@posteo.de
+[core]
+	excludesfile = ~/.git.global.ignore
+	autocrlf = input
+	editor = emacs -nw
+
+[color]
+	ui = true
+[log]
+	decorate = full
+[push]
+	default = matching

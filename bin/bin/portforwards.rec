@@ -1,0 +1,41 @@
+# config file for portforwards script
+
+%rec: cfg
+%key: Name
+%mandatory: Port Offset
+%unique: Offset TargetHost
+%type: Name line
+%type: Offset int
+%type: Port range 0 65535
+%type: Host line
+%type: User line
+%type: Sudo bool
+%type: TargetHost line
+
+Name: mail-eknet
+Host: eknet.org
+Port: 587
+Port: 143
+Offset: 2000
+Sudo: no
+
+Name: mail-posteo
+Host: eknet.org
+TargetHost: posteo.de
+Port: 993
+Port: 587
+Offset: 3000
+Sudo: no
+
+Name: git-eknet
+Host: git.eknet.org
+Port: 29418
+Offset: 0
+Sudo: no
+
+Name: jabber
+Host: eknet.org
+Port: 5222
+Port: 5223
+Offset: 0
+Sudo: no

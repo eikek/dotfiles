@@ -1,0 +1,38 @@
+# idea stuff
+*.iml
+*.ipr
+.idea/
+
+target/
+# var/
+# node_modules/
+
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+
+# ignore cached python byte-code
+**/__pycache__/*.py[co]
+
+# eclipse stuff
+.settings/
+.classpath
+.project
+
+# gtags
+GPATH
+GRTAGS
+GTAGS
+TAGS
+
+# nice2 stuff
+/*.patch
+/*.zip
+
+# ensime
+.ensime_cache/
+.ensime
+
+# Emacs/Cask
+*.elc
+.cask/

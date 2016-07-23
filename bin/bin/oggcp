@@ -1,0 +1,117 @@
+#!/usr/bin/env scsh
+// see https://github.com/eikek/scsh
+
+// oggall -- convert dir structure to ogg, Eike Kettner, 2015
+
+// oggall is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later verpsn.
+
+// oggall is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with oggall. If not, see <http://www.gnu.org/licenses/>.
+//
+/// Commentary:
+
+import scala.util._
+import scala.sys.process._
+import better.files._
+import scsh.files._
+import scsh.confirm._
+import scsh.files.FileCheck._
+
+object oggcp {
+
+  case class Input(source: File = File("."), target: File = File("."))
+  val parser = new scopt.OptionParser[Input]("oggenc") {
+    head("oggenc", "1.0")
+    note("""Convert uncompressed audio files to ogg. Traverse a source
+directory and put the ogg files in the given target directory. If a
+compressed file (ogg, mp3) encountered, it is copied.""")
+    note("")
+    arg[File]("<source>") required() action { (x, c) =>
+      c.copy(source = x)
+    } text("The source directory")
+    arg[File]("<target>") required() action { (x, c) =>
+      c.copy(target = x)
+    } text ("The target directory")
+  }
+
+  def mkDirs(file: File) {
+    val dir = file / `..`
+    if (!dir.isDirectory) {
+      dir.createDirectories()
+    }
+  }
+
+  def convert(in: File, out: File): Unit = {
+    print(s"Converting ${in.name} -> ${out.path} ... ")
+    Process(Seq("oggenc", in.path.toString, "-q7", "--resample", "44100", "-o", out.path.toString)).!<
+    println("Done.")
+  }
+
+  def copy(in: File, out: File): Unit = {
+    print(s"Copying ${in.name} -> ${out.path} ... ")
+    in.copyTo(out)
+    println("Done.")
+  }
+
+  def processFile(input: Input)(p: File): File = {
+    val out = makeTarget(p, input)
+    if (!out.exists) {
+      mkDirs(out)
+      if (isCompressed(p)) copy(p, out) else convert(p, out)
+    } else {
+      println(s"${out.path} already exists.")
+    }
+    out
+  }
+
+  def isUncompressed(f: File) = f.hasExtensions(Set("flac", "wav"))
+
+  def isCompressed(f: File) = f.hasExtensions(Set("mp3", "ogg"))
+
+  def makeTarget(in: File, input: Input): File = {
+    // /music/folder relativize /music/folder/a/b.mp3 => a/b.mp3
+    val sub = input.source relativize in
+    // target / folder / a/b.mp3
+    val out = input.target / input.source.name / sub.toString
+    if (isCompressed(in)) out else out.mapExtension(_ => "ogg")
+  }
+
+  def confirm(input: Input): Boolean = {
+    println {
+      musicFiles(input.source).take(5).map({p =>
+        s"""   ${if (isUncompressed(p)) "Convert " else "Copy "} ${p.path} -> ${makeTarget(p, input).path}"""
+      }).mkString("\n")
+    }
+    continue()
+  }
+
+  def musicFiles(source: File) = walkFiles(source)
+    .filter(_.isRegularFile)
+    .filter(p => isCompressed(p) || isUncompressed(p))
+
+  def main(args: Array[String]): Unit = try {
+    parser.parse(args, Input()) match {
+      case Some(input) =>
+        println(s"Copying ${input.source} to ${input.target}. Example:")
+        input.target.assert(parentWriteable)
+        if (confirm(input)) {
+          musicFiles(input.source.assert(directory)) foreach processFile(input)
+          println("All done.")
+        }
+      case _ =>
+        System.exit(1)
+    }
+  } catch {
+    case e: Exception =>
+      System.err.println(s"ERROR: ${e.getClass}: ${e.getMessage}")
+      System.exit(2)
+  }
+}

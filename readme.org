@@ -1,0 +1,6 @@
+#+title: dotfiles
+
+The 3rd attempt (at least) for my dotfiles. This time managed using
+[[https://www.gnu.org/software/stow/][GNU Stow]]. Before this, I used [[https://github.com/RichiH/vcsh][vcsh]] and [[http://myrepos.branchable.com/][myrepos]], but it turned out to
+be too complicated for me. I think I rather have one repo, so I have
+better editor support, for example.

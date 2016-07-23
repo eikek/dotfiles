@@ -1,0 +1,629 @@
+;; -*- mode: lisp; mode: stumpwm -*-
+
+;; for arch:
+;;  yaourt -S conkeror-git
+;;  pacman -S feh metacity
+
+(in-package :stumpwm)
+
+; still the old style? quicklisp sets this variable and the asdf docs
+; says, that if this variable is set, it is used. The new loading system
+; is only applied, if *central-registry* is nil.
+;; (push "/home/eike/programs/stumpwm-contrib/" asdf:*central-registry*)
+;; (asdf:clear-source-registry)
+
+(set-prefix-key (kbd "C-i"))
+
+;;;;;; some utility functions
+
+(defun exec (cmd &optional collect-output-p)
+  (run-shell-command cmd collect-output-p))
+
+(defun s-trim (str)
+  (string-trim '(#\Newline #\Space)
+               str))
+
+(defun current-date ()
+  (s-trim (exec "date +\"%a %e.%m.%Y %R\"" t)))
+
+(defvar hostname (s-trim (exec "hostname" t))
+  "The hostname of current system.")
+
+(define-key *root-map* (kbd "j") "eval")
+(define-key *root-map* (kbd "d") "colon")
+(define-key *root-map* (kbd "y") "run-shell-command")
+
+
+(defcommand remove-split2 ()()
+  "Alternative to `remove-split' that quickly selects the
+`other-window' such that the focused one stays focused."
+  (other-window)
+  (remove-split))
+
+
+;;;;;; startup programs
+(defun run-startup-programs ()
+  ;;add more here…
+  )
+
+(defun kill-startup-programs ()
+  ;;add more here…
+  )
+
+(add-hook *start-hook* 'run-startup-programs)
+;(add-hook *quit-hook* 'kill-startup-programs)
+
+
+;;;;;; program shortcuts
+(defcommand ror-terminal ()()
+    (run-or-raise "xfce4-terminal" '(:class "Xfce4-terminal")))
+
+(defcommand ror-htop ()()
+  (run-or-raise "xfce4-terminal --title htop --command htop" '(:title "htop")))
+
+(defcommand ror-conkeror ()()
+  (run-or-raise "conkeror" '(:class "Conkeror")))
+
+(defcommand ror-chromium ()()
+  (run-or-raise "chromium" '(:class "chromium")))
+
+(defcommand ror-firefox ()()
+  (run-or-raise "firefox" '(:class "Firefox")))
+
+(defcommand new-emacsframe ()()
+  (exec "emacsclient -c &"))
+
+(defcommand kill-xephyr () ()
+  (run-shell-command "killall Xephyr"))
+
+(defun run-xephyr (cmd &optional display)
+  "Start CMD within a new Xephyr instance.
+DISPLAY defines the display to use, default is ':1.0'."
+  (let* ((disp (or display ":1.0"))
+         (exec (format nil
+                       (concat "Xephyr -ac -br -resizeable ~a & sleep 1 ; "
+                               "DISPLAY=~a metacity & sleep 1; "
+                               "DISPLAY=~a ~a")
+                       disp disp disp cmd)))
+    (run-shell-command exec)))
+
+(defun idea-running? ()
+  "Check if intellij idea is running."
+  (let ((proc (parse-integer (exec "ps aux|grep intellij|wc -l" t))))
+    (= proc 3)))
+
+(defcommand ror-idea ()()
+  "Start idea on group idea. "
+  (if (idea-running?)
+      (run-or-raise "true" '(:class "jetbrains-idea"))
+      ;; (let ((group (find-group (current-screen) "idea")))
+      ;;   (if group
+      ;;       (unless (equal (current-group) group)
+      ;;         (switch-to-group group))
+      ;;      (gnew "idea")))
+      (run-shell-command "idea-community")))
+
+;;;;;;;; window list
+(setq *old-window-format* *window-format*)
+(setq *window-format* "%m%n%s%10t")
+
+;;;;;;;; keys
+(define-key *root-map* (kbd "E") "new-emacsframe")
+(define-key *root-map* (kbd "C-z") "command-mode")
+(define-key *root-map* (kbd "ESC") "abort")
+(define-key *root-map* (kbd "C-o") "other")
+(define-key *root-map* (kbd "q") "remove-split")
+(define-key *root-map* (kbd "c") "exec xfce4-terminal")
+(define-key *root-map* (kbd "C-e") "emacs")
+(define-key *root-map* (kbd "RET") "ror-terminal")
+(define-key *root-map* (kbd "C-RET") "ror-terminal")
+(define-key *root-map* (kbd "C-b") "ror-firefox")
+(define-key *root-map* (kbd "C-c") "ror-chromium")
+(define-key *root-map* (kbd "C-d") "ror-idea")
+(define-key *root-map* (kbd "C-t") "ror-htop")
+(define-key *root-map* (kbd "C-F12") "exec i3lock -c 000000")
+
+(define-key *root-map* (kbd "C-i") "fnext")
+;(define-key *root-map* (kbd "i") "fnext")
+(define-key *root-map* (kbd "TAB") "fnext")
+(define-key *root-map* (kbd "C-SPC") "next")
+(define-key *root-map* (kbd "n") "next-in-frame")
+(define-key *root-map* (kbd "C-n") "next-in-frame")
+(define-key *root-map* (kbd "p") "prev-in-frame")
+(define-key *root-map* (kbd "C-p") "prev-in-frame")
+
+(define-key *root-map* (kbd "w") "windowlist")
+(define-key *root-map* (kbd "C-w") "windowlist")
+
+(define-key *root-map* (kbd "Left") "exchange-direction left")
+(define-key *root-map* (kbd "Right") "exchange-direction right")
+(define-key *root-map* (kbd "Up") "exchange-direction up")
+(define-key *root-map* (kbd "Down") "exchange-direction down")
+
+;;;;;; background
+(exec "feh --bg-fill ~/.backgrounds/$(ls -1 ~/.backgrounds/ | shuf -n1)")
+
+
+;;;;;; colors
+;; color (fg,bg,border) for message and input bar
+(set-bg-color "black")
+(set-fg-color "orange")
+(set-border-color "lightyellow")
+
+;; color/style windows
+(setf *window-border-style* :thin)
+(set-focus-color "green")
+
+;;;;;;;; screenshot once a year
+(defun screenshot (&optional (dir "/tmp/") (root nil))
+  (let* ((file (concat dir (concat (s-trim (exec "date +\"%Y%m%d-%H%M%S\"" t)) ".jpg")))
+         (cmd (format nil "XCURSOR_THEME=redglass xwd ~a | convert - ~a"
+                      (if root "-root" "-screen")
+                      file)))
+    (exec cmd t)
+    (notify (concat "Screenshot at " file))))
+
+(defcommand take-screenshot ()()
+  (screenshot))
+
+(define-key *top-map* (kbd "SunPrint_Screen") "take-screenshot")
+
+
+;;;;;;;; volume control
+
+;; this function is copied from amixer package. the commands generated
+;; by the macro don't work and it is not possible to call this
+;; function because of "Not exteranlized in amixer".
+(defun volcontrol (device channel amount)
+  (let ((percent (parse-integer
+                  (run-shell-command
+                   (concat "amixer -D " (or device "default") " sset " channel " " (or amount "toggle")
+                           "| tail -1"
+                           "| sed 's/^.*\\[\\([[:digit:]]\\+\\)%\\].*$/\\1/'")
+                   t))))
+    (message
+     (concat "Mixer: " channel " " (or amount "toggled")
+             (format nil "~C^B~A%" #\Newline percent) "^b [^[^7*"
+             (bar percent 50 #\# #\:) "^]]"))))
+
+(defcommand ek/vol-up ()()
+            (cond
+              ((string= hostname "ithaka")
+               (progn (volcontrol nil "DAC" "2%+")
+                      (Volcontrol nil "DAC,1" "2%+")))
+              (t (Volcontrol nil "Master" "2%+"))))
+
+(defcommand ek/vol-down ()()
+            (cond
+              ((string= hostname "ithaka")
+               (progn (volcontrol nil "DAC" "2%-")
+                      (Volcontrol nil "DAC,1" "2%-")))
+              (t (Volcontrol nil "Master" "2%-"))))
+
+(define-key *top-map* (kbd "XF86AudioLowerVolume") "ek/vol-down")
+(define-key *top-map* (kbd "XF86AudioRaiseVolume") "ek/vol-up")
+(define-key *top-map* (kbd "XF86AudioMute") "amixer-Master-toggle pulse")
+
+(defun ek/get-brightness ()
+  (let ((value (parse-integer (s-trim (exec "cat /sys/class/backlight/acpi_video0/brightness" t)))))
+    value))
+
+(defun ek/set-brightness (value &optional relative)
+  (let* ((current (ek/get-brightness))
+         (next (if relative (+ current value) value)))
+    (if (and (>= next 0) (<= next 8))
+        (progn
+          (exec (format nil "echo -n ~D > /sys/class/backlight/acpi_video0/brightness" next) t)
+          next)
+        current)))
+
+(defcommand ek/brightness-up ()()
+            (echo (ek/set-brightness 1 t)))
+
+(defcommand ek/brightness-down ()()
+            (echo (ek/set-brightness -1 t)))
+
+(define-key *top-map* (kbd "XF86MonBrightnessDown") "ek/brightness-down")
+(define-key *top-map* (kbd "XF86MonBrightnessUp") "ek/brightness-up")
+
+
+;;;;;;;;; quick webjumps
+(defcommand quick-duck (&optional initial)(:rest)
+  (let ((q (read-one-line (current-screen)
+                          "ask a duck: "
+                          :initial-input
+                          (or initial
+                              (let* ((sel (get-x-selection))
+                                     (len (length sel)))
+                                (if (> len 30)
+                                    (subseq sel 0 30)
+                                    sel))))))
+    (unless (= 0 (length q))
+      (run-shell-command (concat "conkeror 'duckduckgo " q "'")))))
+
+(define-key *root-map* (kbd "C-DEL") "quick-duck")
+
+
+;;;;;;;;; notify function
+(defcommand notify (msg &optional (bg "blue") (fg "white")) ((:rest "Notify: "))
+    "A more prominent echo suitable for one-line messages."
+    (let* ((maxlen (max (length msg) 50))
+           (pad (round (/ (- maxlen (length msg)) 2.0)))
+           (fmt (format nil "~~~da~c~~~da~~a~~~da~c~~~da"
+                        maxlen #\Newline pad pad #\Newline maxlen))
+           (str (format nil fmt " " " " msg " " " ")))
+      (let ((cb (screen-bg-color (current-screen)))
+            (cf (screen-fg-color (current-screen))))
+        (set-bg-color bg)
+        (set-fg-color fg)
+        (echo str)
+        (setf (screen-bg-color (current-screen)) cb)
+        (setf (screen-fg-color (current-screen)) cf)
+        (update-colors-all-screens))))
+
+
+
+;;;;;;;; get window out of the way
+(defcommand win-away (frame) ((:frame t))
+  "Moves the current window away into another frame chosen by the
+user. The focus is left on the current frame."
+  (let* ((win (current-window))
+         (g   (current-group))
+         (f   (window-frame win)))
+    (unless (equal f frame)
+      (pull-window win frame)
+      (focus-last-frame g))))
+
+(define-key *root-map* (kbd "a") "win-away")
+(define-key *root-map* (kbd "C-a") "win-away")
+
+
+
+;;;;;;;; emacs interaction
+;; add key bindings to send clock-last/clock-out/clock-cancel commands to emacs
+;; those commands must be registered as global keys in emacs of course
+(defun keys-to-emacs (keys)
+  (let ((win (car (find-matching-windows '(:class "Emacs") t t)))
+        (keylist (if (listp keys) keys (list keys))))
+    (when win
+      (dolist (k keylist)
+        (send-fake-key win (kbd k))))))
+
+(defcommand clock-out ()()
+  (keys-to-emacs '("C-c" "C-x" "C-o")))
+
+(defcommand clock-last ()()
+  (keys-to-emacs '("C-c" "C-x" "C-x")))
+
+(defcommand clock-quit ()()
+  (keys-to-emacs '("C-c" "C-x" "C-q")))
+
+(defcommand clock-in ()()
+  (emacs)
+  (keys-to-emacs '("C-u" "C-c" "C-x" "C-i")))
+
+(defvar *clock-keymap* (make-sparse-keymap))
+(define-key *clock-keymap* (kbd "C-i") "clock-in")
+(define-key *clock-keymap* (kbd "C-o") "clock-out")
+(define-key *clock-keymap* (kbd "C-x") "clock-last")
+(define-key *clock-keymap* (kbd "C-q") "clock-quit")
+(define-key *root-map* (kbd "C-x") '*clock-keymap*)
+
+
+;;;;;;; mpc stuff
+(defun mpc-playing-p ()
+  (equal
+   (s-trim (exec "mpc status|head -n2|tail -n1| sed 's/\\[\\([a-z]\\+\\)\\].*/\\1/'" t))
+   "playing"))
+
+
+(defcommand mpc-status (&optional (exit-mpc-mode t))()
+  "Shows mpc status in message area."
+  (echo (s-trim (exec "mpc status" t)))
+  (when exit-mpc-mode
+    (mpc-mode-exit nil)))
+
+(defcommand mpc-current (&optional (exit-mpc-mode t))()
+  "Show current song"
+  (notify (s-trim (exec "mpc current" t))))
+
+(defcommand mpc-toggle (&optional (exit-mpc-mode-p t))()
+  "Toggle playing/pausing."
+    (if (mpc-playing-p)
+        (exec "mpc pause" t)
+        (exec "mpc play" t))
+    (mpc-status exit-mpc-mode-p))
+
+(defcommand mpc-next ()()
+  "Skip to the next track."
+  (echo (s-trim (exec "mpc next" t))))
+
+(defcommand mpc-playlist ()()
+  "Echos the current playlist. If it is too long, it's your fault :)."
+  (echo (s-trim (exec "mpc playlist" t))))
+
+(defcommand mpc-mode (&optional (msg-p t))()
+  "Enables mpc-mode."
+  (unless (eq *mpc-keymap* *top-map*)
+    (push-top-map *mpc-keymap*)
+    (when msg-p
+      (echo "mpc mode enabled"))))
+
+(defcommand mpc-mode-exit (&optional (msg-p t))()
+  "Exists mpc-mode if it is active."
+  (when (eq *mpc-keymap* *top-map*)
+    (pop-top-map)
+    (when msg-p
+      (echo "mpc mode disabled"))))
+
+(defvar *mpc-keymap* (make-sparse-keymap))
+(define-key *mpc-keymap* (kbd "F12") "mpc-toggle")
+(define-key *mpc-keymap* (kbd "+") "ek/vol-up")
+(define-key *mpc-keymap* (kbd "-") "ek/vol-down")
+(define-key *mpc-keymap* (kbd "RET") "mpc-mode-exit")
+(define-key *mpc-keymap* (kbd "SPC") "mpc-status")
+(define-key *mpc-keymap* (kbd "n") "mpc-next")
+(define-key *mpc-keymap* (kbd "l") "mpc-playlist")
+
+;;(define-key *top-map* (kbd "F12") "mpc-mode")
+
+;;;;;; emms integration
+;; switched to emms
+
+(defcommand emms-show-current ()()
+  (keys-to-emacs '("F12" "c")))
+
+(defcommand emms-toggle ()()
+  (keys-to-emacs '("F12" "p")))
+
+(defcommand emms-next ()()
+  (keys-to-emacs '("F12" "n")))
+
+(defcommand emms-mode ()()
+  "Enables emms mode."
+  (unless (eq *emms-keymap* *top-map*)
+    (push-top-map *emms-keymap*)
+    (echo "Emms mode enabled")))
+
+(defcommand emms-mode-exit ()()
+  "Exists emms mode"
+  (when (eq *emms-keymap* *top-map*)
+    (pop-top-map)
+    (echo "emms mode disabled")))
+
+(defvar *emms-keymap* (make-sparse-keymap))
+(define-key *emms-keymap* (kbd "F12") "emms-toggle")
+(define-key *emms-keymap* (kbd "RET") "emms-mode-exit")
+(define-key *emms-keymap* (kbd "SPC") "emms-show-current")
+(define-key *emms-keymap* (kbd "x") "ek/vol-up")
+(define-key *emms-keymap* (kbd "v") "ek/vol-down")
+(define-key *emms-keymap* (kbd "n") "emms-next")
+
+;(define-key *top-map* (kbd "F12") "emms-mode")
+;(define-key *top-map* (kbd "XF86AudioPlay") "emms-toggle")
+;(define-key *top-map* (kbd "XF86AudioNext") "emms-next")
+
+;;;;;;;; pass integration
+
+(defvar *common-passwords* '())
+
+(setq *common-passwords*
+  '(("bluecare" . "bluecare/login")
+    ("http://eknet.org" . "eknet.org/www")
+    ("github" . "devel/github")
+    ("magnatune" . "internet/magnatune")
+    ("google" . "internet/google")))
+
+(defvar *pass-info* "")
+(defvar *pass-keymap* (make-sparse-keymap))
+
+(defcommand copy-password (name)(:rest)
+  (pop-top-map)
+  (let* ((cmd (format nil "pass show -c ~a" name)))
+    (exec cmd)
+    (echo "Copied.")))
+
+(defcommand password-show ()()
+  (echo *pass-info*))
+
+(defcommand password-clear ()()
+  (exec "echo RELOADAGENT | gpg-connect-agent")
+  (echo "Password cache cleared."))
+
+(defcommand password-mode ()()
+  (push-top-map *pass-keymap*)
+  (password-show))
+
+(defcommand password-mode-exit ()()
+  (pop-top-map)
+  (echo "password chooser disabled."))
+
+(defun password-update-keys ()
+  (setq *pass-keymap (make-sparse-keymap))
+  (define-key *pass-keymap* (kbd "C-g") "password-mode-exit")
+  (define-key *pass-keymap* (kbd "C-s") "password-show")
+  (define-key *pass-keymap* (kbd "C-q") "password-clear")
+  (setq *pass-info* (format nil "Choose a password~c-----------------~c~c"
+                            #\Newline #\Newline #\Newline #\Newline))
+  (let ((i 0))
+    (dolist (pair *common-passwords*)
+      (setq i (1+ i))
+      (define-key *pass-keymap* (kbd (format nil "~a" i))
+        (format nil "copy-password ~a" (cdr pair)))
+      (setq *pass-info*
+            (concat *pass-info* (format nil "^2  ~d^n    ~a~c" i (car pair) #\Newline))))
+    (setq *pass-info* (concat *pass-info*
+                              "^2 C-g^n   Exit."))
+    (setq *pass-info* (s-trim *pass-info*)))
+  t)
+
+(password-update-keys)
+
+(define-key *root-map* (kbd "C-s") "password-mode")
+
+
+;;; rip emac's golden-ratio mode
+
+(defvar golden-ratio-value 1.618
+  "The golden ration value.")
+
+(defun golden-ratio--dimensions (&optional (screen (current-screen)))
+  (list (floor (/ (screen-height screen) golden-ratio-value))
+        (floor (/ (screen-width screen) golden-ratio-value))))
+
+(defun golden-ratio-resize-frame (screen group frame)
+  (let* ((dim (golden-ratio--dimensions screen))
+         (nrow (floor (- (car dim) (frame-height frame))))
+         (ncol (floor (- (cadr dim) (frame-width frame)))))
+    (clear-frame-outlines group)
+    (resize-frame group frame nrow :height)
+    (resize-frame group frame ncol :width)
+    (draw-frame-outlines group (current-head))))
+
+(defun golden-ratio-resize-current ()
+  (golden-ratio-resize-frame (current-screen)
+                             (current-group)
+                             (tile-group-current-frame (current-group))))
+
+(defcommand golden-ratio-resize ()()
+  "Resize the current frame according to the golden-ratio."
+  (golden-ratio-resize-current))
+
+(defun golden-ratio--resize-hook (&optional _win1 _win2)
+  (golden-ratio-resize-current))
+
+(defcommand golden-ratio-mode ()()
+  "Toggles golden-ratio mode, that when active resizes the focused
+frame according to the golden-ratio value."
+  (let ((activep (find-if (lambda (e) (eq e 'golden-ratio--resize-hook)) *focus-frame-hook*)))
+    (if activep
+        (progn
+          (remove-hook *focus-frame-hook* 'golden-ratio--resize-hook)
+          (echo "golden ratio mode disabled"))
+        (progn
+          (add-hook *focus-frame-hook* 'golden-ratio--resize-hook)
+          (echo "golden ratio mode enabled")))))
+
+;;;;; commands for my new screen
+
+(defun is-big-screen-p ()
+  (let ((width (screen-width (current-screen))))
+    (= width 3840)))
+
+(defun is-small-screen-p ()
+  (let ((width (screen-width (current-screen))))
+    (= width 2560)))
+
+(defun small-screen()
+  "Set resolution to 2560x1440"
+  (exec "xrandr --output DP-1 --mode 2560x1440 --pos 0x0"))
+
+(defun big-screen ()
+  "Set resolution to 4k"
+  (exec "xrandr --output DP-1 --mode 3840x2160 --pos 0x0"))
+
+(defcommand switch-screen-size () ()
+  (if (is-big-screen-p)
+    (small-screen)
+    (if (is-small-screen-p)
+      (big-screen))))
+
+;;(define-key *root-map* (kbd "F12") "switch-screen-size")
+
+;;;;; switch language
+
+(defcommand language-toggle () ()
+            (exec "neomodmap.sh toggle")
+            (echo "Changed language."))
+
+(define-key *root-map* (kbd "l") "language-toggle")
+
+
+;;;;;;;;-line
+;; (asdf:load-system "cpu")
+;; (asdf:load-system "net")
+;; (asdf:load-system "amixer")
+
+;;(load-module "stumptray")
+
+;(set-contrib-dir "/nix/store/xrvdkjlykiihxl9a0dhqs1xr8qqzgr6g-stumpwmContrib-0.9.8/contrib")
+(load-module "cpu")
+(load-module "amixer")
+(load-module "net")
+
+(when (or (equal hostname "nyx") (equal hostname "lenni"))
+  (load-module "battery-portable"))
+
+(defun battery-line ()
+  (if (or (equal hostname "nyx") (equal hostname "lenni"))
+      "[B%B]"
+      ""))
+
+(defun volume-muted? (&optional device channel)
+  (let ((level (s-trim (exec (concat "amixer -D "
+                                     (or device "default")
+                                     " sget "
+                                     (or channel "Master")
+                                     "| tail -1"
+                                     "| sed 's/^.*\\[\\([onf]*\\)\\]$/\\1/'")
+                             t))))
+    (equal level "off")))
+
+(defun get-task-info ()
+  "Get info about current task from emacs."
+  (let ((info (s-trim
+               (remove #\"
+                       (exec "emacsclient --eval '(my/org-get-clock-string)'" t)))))
+    (if (string= "nil" info)
+        ""
+        info)))
+
+(defun volume (&optional device channel)
+  (if (volume-muted?)
+      "^1Vol: --^n"
+      (concat "Vol: "
+              (s-trim (exec (concat "amixer -D "
+                                    (or device "default")
+                                    " sget "
+                                    (or channel "Master")
+                                    "| tail -1"
+                                    "| sed 's/^.*\\[\\([[0-9]\\+\\)%\\].*$/\\1/'")
+                            t))
+              "%")))
+
+
+
+(setf *mode-line-screen-position* :top)
+(setf *mode-line-frame-position* :top)
+(setf *mode-line-border-width* 0)
+(setf *mode-line-background-color* "black")
+(setf *mode-line-foreground-color* "orange")
+(setf *mode-line-border-color* "lightyellow")
+(setf *mode-line-timeout* 5)
+
+(setf *screen-mode-line-format*
+      (list "^n"
+            '(:eval (current-date))
+            " ^2%c%l"
+            '(:eval (volume))
+            " "
+            '(:eval (battery-line))
+            " ^7%w"
+            "^> ^5*"
+            '(:eval (get-task-info))
+            " ^n<"
+            '(:eval (group-name (current-group)))
+            ">"))
+
+
+(dolist (s *screen-list*)
+  (dolist (h (screen-heads s))
+    (enable-mode-line s h T)))
+
+
+;;;;;; swank !
+;; (require 'swank)
+;; (defvar swank-server-created nil)
+;; (unless swank-server-created
+;;   (swank:create-server :port 4005 :dont-close t)
+;;   (setf swank-server-created T))

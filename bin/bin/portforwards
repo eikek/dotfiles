@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+
+# A script that sets up simple local port forwards as specified in a
+# config file. The config file is in rec format, so this script
+# requires the recutils package to be installed.
+
+# See http://www.gnu.org/software/recutils/
+# Config file must have the following format:
+# %rec: cfg
+# %key: Name
+# %mandatory: Port Offset
+# %unique: Offset TargetHost
+# %type: Name line
+# %type: Offset int
+# %type: Port range 0 65535
+# %type: Host line
+# %type: User line
+# %type: Sudo bool
+# %type: TargetHost line
+set -e
+CFG=$(dirname $0)/portforwards.rec
+if [ ! -e "$CFG" ]; then
+    echo "Config file $CFG does not exist!"
+    exit 1
+fi
+recfix --check "$CFG"
+
+action=$1
+if [ -n "$action" ]; then
+    shift
+fi
+
+PID_DIR="/tmp/$(basename $0)"
+mkdir -p "$PID_DIR"
+
+cfgval() {
+    recsel "$CFG" -t cfg -C "$@" | cut -d' ' -f2
+}
+
+cfgval_name() {
+    cfgval -p $2 -e "Name = '$1'"
+}
+
+cfgval_bool() {
+    case $(cfgval_name "$@") in
+        yes) return 0
+            ;;
+        0) return 0
+            ;;
+        true) return 0
+            ;;
+        *) return 1
+    esac
+}
+
+cfgname_missing() {
+    [[ "$(recsel "$CFG" -t cfg -c -e "Name = '$1'")" == "0" ]]
+}
+
+start() {
+    name=$1
+    host=$(cfgval_name $name Host)
+    target=$(cfgval_name $name TargetHost)
+    offset=$(cfgval_name $name Offset)
+    user=$(cfgval_name $name User)
+    sudo=""
+    if $(cfgval_bool $name Sudo); then
+        sudo="sudo"
+    fi
+    echo "Start forwarding (${sudo:-no sudo}) ${user:-$USER}@$host->$target with offset $offset"
+    for rport in $(cfgval -p Port -e "Name = '$name'" | tr '\n' ' '); do
+        lport=$(expr $offset + $rport)
+        pidfile=$PID_DIR/${name}_${rport}
+        echo "Forwarding local $lport -> $rport"
+        if [ -e "$pidfile" ]; then
+            echo "Pidfile $pidfile exists, stopping first"
+            stop $name
+        fi
+        if [ -e "$pidfile" ]; then
+            echo "Pidfile $pidfile still exists, not starting. Remove and retry if no portforward is running"
+        else
+            ssh -N -L $lport:${target:-localhost}:$rport ${user:-$USER}@$host &
+            echo "$!" > "$pidfile"
+        fi
+    done
+}
+
+stop() {
+    host=$1
+    echo "Killing ssh portforward for $host"
+    cat $PID_DIR/${host}* | tr '\n' ' ' | xargs kill || true
+    rm $PID_DIR/${host}*
+}
+
+names="$@"
+
+case $action in
+    start)
+        if [ -z "$names" ]; then
+            names=$(cfgval -p Name | tr '\n' ' ')
+        fi
+        for name in $names; do
+            if $(cfgname_missing $name); then
+                echo "$name is not configured"
+                exit 2
+            fi
+            start $name
+        done
+        ;;
+    stop)
+        if [ -z "$names" ]; then
+            names=$(ls -1 "$PID_DIR" | sed 's/_[0-9]\+$//g' | sort | uniq)
+        fi
+        for name in $names; do
+            stop $name
+        done
+        ;;
+    *)
+        echo "Usage: $0 {start|stop} [name ...]"
+        exit 2
+        ;;
+esac

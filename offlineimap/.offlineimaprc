@@ -1,0 +1,47 @@
+# -*- conf -*-
+
+[general]
+accounts = eknet, posteo
+pythonfile = ~/.offlineimap.py
+socktimeout = 30
+
+[Account eknet]
+localrepository = eknet-local
+remoterepository = eknet-remote
+status_backend = sqlite
+quick = 5
+
+[Account posteo]
+localrepository = posteo-local
+remoterepository = posteo-remote
+status_backend = sqlite
+quick = 5
+
+[Repository eknet-local]
+type = Maildir
+localfolders = ~/Mail/eknet
+
+[Repository eknet-remote]
+type = IMAP
+ssl = no
+starttls = yes
+remotehosteval = get_host_pass("email/eknet.org")
+remoteporteval = get_port_pass("email/eknet.org")
+remoteusereval = get_user_pass("email/eknet.org")
+remotepasseval = get_password_pass("email/eknet.org")
+cert_fingerprint = 08D4899BBA7664025E868EFF4CAC9F2CA376020B
+maxconnections = 1
+
+[Repository posteo-local]
+type = Maildir
+localfolders = ~/Mail/posteo
+
+[Repository posteo-remote]
+type = IMAP
+ssl = yes
+remotehosteval = get_host_pass("email/posteo.de")
+remoteporteval = get_port_pass("email/posteo.de")
+remoteusereval = get_user_pass("email/posteo.de")
+remotepasseval = get_password_pass("email/posteo.de")
+cert_fingerprint = a5e7961ac5b220e516dd490aae174ff21bf3aba7
+maxconnections = 1

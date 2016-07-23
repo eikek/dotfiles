@@ -1,0 +1,125 @@
+#!/usr/bin/env scsh
+// see https://github.com/eikek/scsh
+
+// h264enc -- Encode to h264, Eike Kettner, 2015
+
+// h264enc is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published
+// by the Free Software Foundation, either version 3 of the License,
+// or (at your option) any later verpsn.
+
+// h264enc is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+// General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with h264enc. If not, see <http://www.gnu.org/licenses/>.
+//
+/// Commentary:
+
+import better.files._
+import scsh.files._
+import scsh.bulkfile._
+import scala.sys.process._
+
+case class Config(
+  params: Params = Params(),
+  crf: Int = 25,
+  langs: Seq[String] = Seq("deu", "ger", "eng"),
+  crop: Option[String] = None,
+  scale: Option[String] = None
+) extends BulkFileConfig
+
+case class StreamDef(
+  num: (String, String),
+  lang: String,
+  kind: String,
+  details: String)
+
+// example:
+//  Stream #0:0(eng): Video: h264 (High), yuv420p(tv, bt709), 1920x1080 [SAR 1:1 DAR 16:9], 23.98 fps, 23.98 tbr, 1k tbn, 47.95 tbc
+//  Stream #0:1(eng): Audio: dts (DTS), 48000 Hz, 5.1(side), fltp, 1536 kb/s (default)
+object StreamDefParser extends scala.util.parsing.combinator.RegexParsers {
+  val num: Parser[(String, String)] = "#" ~> "[0-9]".r ~ ":" ~ "[0-9]+".r ^^ {
+    case n1 ~ ":" ~ n2 => (n1.trim, n2.trim)
+  }
+  val lang: Parser[String] = "(" ~> "[a-zA-Z]+".r <~ ")" ^^ { _.toLowerCase.trim }
+  val kind: Parser[String] = ":" ~> "[a-zA-Z]+".r <~ ":" ^^ { _.toLowerCase.trim }
+  val rest: Parser[String] = ".*$".r
+  val streamDef: Parser[StreamDef] = "Stream" ~> num ~ lang ~ kind ~ rest ^^ {
+    case n ~ l ~ k ~ r => StreamDef(n, l, k, r.trim)
+  }
+  def apply(s: String): Option[StreamDef] = parse(streamDef, s.trim) match {
+    case Success(d, _) => Some(d)
+    case _ => None
+  }
+}
+
+object h264enc extends FileTransformProcess[Config] {
+  def parser = new BulkFileParser[Config]("h264enc") {
+    head("h264enc", "1.0")
+    note("Encodes video files with ffmpeg and h264 codec. Audio tracks are\n"+
+      "copied if it is not stereo (but i.e. 5.1). Stereo audio tracks\n"+
+      "are encoded with libvorbis. The output file is mkv.\n")
+
+    opt[Int]("crf") optional() valueName("[0-50]") action { (x, c) =>
+      c.copy(crf = x)
+    } text ("The video quality 'constant rate factor'.\n" +
+      "        See http://trac.ffmpeg.org/wiki/Encode/H.264")
+
+    opt[Seq[String]]("langs") optional() valueName("deu,eng,…") action { (x, c) =>
+      c.copy(langs = x.map(_.toLowerCase))
+    } text ("Language streams to include. Defaults to 'deu,ger,eng'. The order\n" +
+      "        reflects the order in the output file.")
+
+    opt[String]("scale") optional() valueName("WxH") action { (x, c) =>
+      c.copy(scale = Some(x))
+    } text ("scale the video by WxH")
+
+    opt[String]("crop") optional() valueName("w:h:x:y") action { (x, c) =>
+      c.copy(crop = Some(x))
+    } text ("crop the video using a rectangle of wxh with upper left corner at x,y")
+    addBaseOptions()
+
+    note("\nParallel execution is not recommended, because the h264 codec already\n"+
+      "uses all cores.")
+
+    def update(cfg: Config, params: Params) = cfg.copy(params = params)
+  }
+
+  def makeOutFile(in: File, cfg: Config) = in.mapExtension(_ => s"transcoded${cfg.crf}.mkv")
+
+  def findStreams(in: File): List[StreamDef] = {
+    val cmd = Cmd("ffmpeg") ~ "-i" ~ in
+    val buf = new collection.mutable.ListBuffer[StreamDef]()
+    Process(cmd.value).!(ProcessLogger(l => StreamDefParser(l) match {
+      case Some(d) => buf += d
+      case _ =>
+    }))
+    buf.toList
+  }
+
+  def makeCommand(in: File, out: File, cfg: Config) = {
+    val streams = findStreams(in)
+      .filter(_.kind == "audio")
+      .zipWithIndex
+      .filter(t => cfg.langs.contains(t._1.lang))
+      .groupBy(t => t._1.lang)
+      .values.map(_.head)
+      .toList //make audio stream order as specified with --langs (doesn't reset default flag)
+      .sortWith({ case ((def1, _), (def2, _)) =>
+        cfg.langs.indexOf(def1.lang) < cfg.langs.indexOf(def2.lang)
+      })
+
+    val mapOpt = streams.flatMap(t => List("-map", "0:a:" + t._2))
+    val audioCodec =
+      if (streams.forall(t => t._1.details.toLowerCase.contains("stereo"))) Seq("libvorbis", "-qscale:a", "7")
+      else Seq("copy")
+
+    val crop = cfg.crop.map(x => Seq("-vf", "crop=" + x)).getOrElse(Seq())
+    val scale = cfg.scale.map(x => Seq("-s", x)).getOrElse(Seq())
+    Cmd("ffmpeg") ~ "-i" ~ in ~ crop ~ "-map" ~ "0:v:0" ~ scale ~ "-c:v" ~ "h264" ~ "-crf" ~ cfg.crf ~ mapOpt ~ "-c:a" ~ audioCodec ~ out
+  }
+}
+h264enc.main(args, Config())
