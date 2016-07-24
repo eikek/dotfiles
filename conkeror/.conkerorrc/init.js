@@ -1,9 +1,5 @@
 // -*- js2 -*-
 
-
-// I think by the time kill_buffer_hook runs the buffer is gone so I
-// patch kill_buffer
-
 var kill_buffer_original = kill_buffer_original || kill_buffer;
 
 var killed_buffer_urls = [];
@@ -101,8 +97,3 @@ if ('@hyperstruct.net/mozlab/mozrepl;1' in Cc) {
   if (! mozrepl.isActive())
     mozrepl.start(4243);
 }
-
-function my_zoom_set (buffer) {
-    browser_zoom_set(buffer, true, 150);
-}
-add_hook('create_buffer_late_hook', my_zoom_set);
