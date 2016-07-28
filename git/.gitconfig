@@ -9,6 +9,6 @@
 [color]
 	ui = true
 [log]
-	decorate = full
+	decorate = short
 [push]
 	default = matching
