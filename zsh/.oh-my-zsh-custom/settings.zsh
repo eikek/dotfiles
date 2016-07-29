@@ -55,6 +55,6 @@ else
     echo "Program 'direnv' not installed."
 fi
 
-if [ -r $ZSH_CUSTOM/local.zsh ]; then
-    source $ZSH_CUSTOM/local.zsh
-fi
+find $ZSH_CUSTOM -name "*local.zsh" | while read f; do
+    source $f
+done
