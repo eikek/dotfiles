@@ -32,9 +32,11 @@ windows:
   - bcrun:
       layout: even-vertical
       panes:
-        - ./mongodb3
         - ./startCluster.sh | tee cluster.log
         - ./startFrontend.sh | tee frontend.log
+  - grunt:
+      - cd static/main
+      - grunt
   - logs:
       panes:
         - emacs -nw cluster.log

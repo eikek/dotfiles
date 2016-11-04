@@ -56,7 +56,7 @@
 
 ;;;;;; program shortcuts
 (defcommand ror-terminal ()()
-    (run-or-raise "xfce4-terminal" '(:class "Xfce4-terminal")))
+  (run-or-raise "xfce4-terminal" '(:class "Xfce4-terminal")))
 
 (defcommand ror-htop ()()
   (run-or-raise "xfce4-terminal --title htop --command htop" '(:title "htop")))
@@ -141,6 +141,8 @@ DISPLAY defines the display to use, default is ':1.0'."
 (define-key *root-map* (kbd "Up") "exchange-direction up")
 (define-key *root-map* (kbd "Down") "exchange-direction down")
 
+(define-key *top-map* (kbd "XF86LaunchA") "exec reset-display")
+
 ;;;;;; background
 (exec "feh --bg-fill ~/.backgrounds/$(ls -1 ~/.backgrounds/ | shuf -n1)")
 
@@ -188,18 +190,18 @@ DISPLAY defines the display to use, default is ':1.0'."
              (bar percent 50 #\# #\:) "^]]"))))
 
 (defcommand ek/vol-up ()()
-            (cond
-              ((string= hostname "ithaka")
-               (progn (volcontrol nil "DAC" "2%+")
-                      (Volcontrol nil "DAC,1" "2%+")))
-              (t (Volcontrol nil "Master" "2%+"))))
+  (cond
+   ((string= hostname "ithaka")
+    (progn (volcontrol nil "DAC" "2%+")
+           (Volcontrol nil "DAC,1" "2%+")))
+   (t (Volcontrol nil "Master" "2%+"))))
 
 (defcommand ek/vol-down ()()
-            (cond
-              ((string= hostname "ithaka")
-               (progn (volcontrol nil "DAC" "2%-")
-                      (Volcontrol nil "DAC,1" "2%-")))
-              (t (Volcontrol nil "Master" "2%-"))))
+  (cond
+   ((string= hostname "ithaka")
+    (progn (volcontrol nil "DAC" "2%-")
+           (Volcontrol nil "DAC,1" "2%-")))
+   (t (Volcontrol nil "Master" "2%-"))))
 
 (define-key *top-map* (kbd "XF86AudioLowerVolume") "ek/vol-down")
 (define-key *top-map* (kbd "XF86AudioRaiseVolume") "ek/vol-up")
@@ -219,10 +221,10 @@ DISPLAY defines the display to use, default is ':1.0'."
         current)))
 
 (defcommand ek/brightness-up ()()
-            (echo (ek/set-brightness 1 t)))
+  (echo (ek/set-brightness 1 t)))
 
 (defcommand ek/brightness-down ()()
-            (echo (ek/set-brightness -1 t)))
+  (echo (ek/set-brightness -1 t)))
 
 (define-key *top-map* (kbd "XF86MonBrightnessDown") "ek/brightness-down")
 (define-key *top-map* (kbd "XF86MonBrightnessUp") "ek/brightness-up")
@@ -238,7 +240,7 @@ DISPLAY defines the display to use, default is ':1.0'."
                                      (len (length sel)))
                                 (if (> len 30)
                                     (subseq sel 0 30)
-                                    sel))))))
+                                  sel))))))
     (unless (= 0 (length q))
       (run-shell-command (concat "conkeror 'duckduckgo " q "'")))))
 

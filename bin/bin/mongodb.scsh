@@ -1,0 +1,99 @@
+#!/usr/bin/env scsh
+
+import better.files._
+import scala.sys.process._
+import scala.concurrent.Future
+import scala.concurrent.ExecutionContext.Implicits.global
+
+sealed trait MongoVersion
+object MongoVersion {
+  case object Current extends MongoVersion
+  case object v26 extends MongoVersion
+
+  def wrapCommand(v: MongoVersion, cmd: Seq[String]): Seq[String] = v match {
+    case `v26` =>
+      val nixpkgs = "nixpkgs=https://github.com/NixOS/nixpkgs-channels/archive/nixos-14.12.tar.gz"
+      List("nix-shell", "-I", nixpkgs, "-p", "mongodb", "--run") ::: List(cmd.mkString(" "))
+    case _ =>
+      cmd
+  }
+}
+
+val mypwd = File(System.getenv("SCSH_SCALA_SCRIPT")).parent
+
+case class Opts(
+  mongoVersion: MongoVersion = MongoVersion.Current,
+  mongoPort: Int = 27018,
+  mongoDataDir: File = mypwd / "mongodata",
+  resetData: Boolean = false,
+  testData: Seq[File] = List(mypwd / "data-bc", mypwd / "data-patstamm")
+)
+
+implicit val versionRead: scopt.Read[MongoVersion] =
+  scopt.Read.reads({
+    case "26" => MongoVersion.v26
+    case "2.6" => MongoVersion.v26
+    case _ => MongoVersion.Current
+  })
+implicit val fileRead: scopt.Read[File] =
+  scopt.Read.reads(File(_))
+
+val parser = new scopt.OptionParser[Opts]("mongodb") {
+  head("mongodb", "1.0")
+
+  help("help").text("Prints this help text")
+  opt[MongoVersion]('v', "version") action { (v, c) =>
+    c.copy(mongoVersion = v)
+  } text ("Mongodb version to use. Default is `current'. Alternative is `2.6'.")
+
+  opt[Int]('p', "port") action { (p, c) =>
+    c.copy(mongoPort = p)
+  } text("Port to bind mongod")
+
+  opt[File]('d', "datadir") action { (f, c) =>
+    c.copy(mongoDataDir = f)
+  } text ("Directory to store data.")
+
+  opt[Unit]('r', "reset") action { (_, c) =>
+    c.copy(resetData = true)
+  } text ("Whether to import test data. Removes existing data.")
+}
+
+def makeCommand(opts: Opts): Seq[String] = {
+  val cmd = List("mongod", "--noauth", "--dbpath", opts.mongoDataDir.pathAsString, "--port", opts.mongoPort.toString)
+  MongoVersion.wrapCommand(opts.mongoVersion, cmd)
+}
+
+def submitImportData(opts: Opts)(datadir: File) {
+  if (!datadir.isDirectory) {
+    sys.error(s"$datadir is not a directory")
+  }
+  Future {
+    Thread.sleep(3000)
+    // mongoimport --port 27018  --db patstamm --file $f --collection ${NAME%.json}
+    val db = datadir.name.substring("data-".length)
+    def importCmd(f: File) = List("mongoimport",
+      "--port", opts.mongoPort.toString,
+      "--db", db,
+      "--file", f.pathAsString,
+      "--collection", f.nameWithoutExtension)
+    println(">>> import " + datadir)
+    datadir.children.map(importCmd _).foreach(cmd => {
+      println(s""">>> ${cmd.mkString(" ")}""")
+      cmd.!
+    })
+  }
+}
+
+parser.parse(args, Opts()) match {
+  case Some(opts) =>
+    if (opts.resetData) {
+      opts.mongoDataDir.delete()
+      opts.testData.foreach(submitImportData(opts))
+    }
+    opts.mongoDataDir.createDirectories()
+    val cmd = makeCommand(opts)
+    println(cmd.mkString(" "))
+    cmd.!
+  case None =>
+}
