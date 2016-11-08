@@ -24,7 +24,7 @@ case class Show(station: String, title: String, show: String, date: String, time
   def showIs(name: String) = show.toLowerCase == name
 
   def fileName = (show+"-"+title+"-"+date+".mp4").toLowerCase
-    .replaceAll(" ", "_")
+    .replaceAll("\\s+", "_")
     .replaceAll("ä", "ae").replaceAll("Ä", "Ae")
     .replaceAll("ü", "ue").replaceAll("Ü", "Ue")
     .replaceAll("ö", "oe").replaceAll("Ö", "Oe")
@@ -44,14 +44,20 @@ def movieList = upickle.json.read(Http(movieListUrl).asString.body).arr.toStream
 def tatortFilter(s: Show): Boolean =
   s.station == "ARD" &&
   s.showIs("tatort") &&
+  !s.title.toLowerCase.contains("hörfassung") &&
   s.localDate.getDayOfWeek == DayOfWeek.SUNDAY &&
   s.duration.toHours >= 1
 
 @main
-def main(target: Path): Unit = {
+def main(target: Path, n: Int = 1): Unit = {
   implicit val wd = target
-  movieList.filter(tatortFilter).headOption.foreach { show =>
+  movieList.filter(tatortFilter).take(n).foreach { show =>
     println(s"Download '${show.title}' to ${target/show.fileName} …")
     %curl ("-L", "-o", (target/show.fileName).toString, show.url)
   }
+}
+
+@main
+def test(n: Int = 1): Unit = {
+  println(movieList.filter(tatortFilter).take(n).toList)
 }
