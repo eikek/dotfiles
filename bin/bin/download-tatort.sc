@@ -52,8 +52,12 @@ def tatortFilter(s: Show): Boolean =
 def main(target: Path, n: Int = 1): Unit = {
   implicit val wd = target
   movieList.filter(tatortFilter).take(n).foreach { show =>
-    println(s"Download '${show.title}' to ${target/show.fileName} …")
-    %curl ("-L", "-o", (target/show.fileName).toString, show.url)
+    val out = target/show.fileName
+    if (exists(out)) println(s"$out already exists")
+    else {
+      println(s"Download '${show.title}' to $out …")
+      %curl ("-L", "-o", out.toString, show.url)
+    }
   }
 }
 
