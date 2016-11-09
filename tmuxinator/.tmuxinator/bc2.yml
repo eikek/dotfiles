@@ -28,7 +28,6 @@ startup_window: 2
 # post: tmux -CC attach -t bc1
 
 windows:
-  - sbt: sbt
   - bcrun:
       layout: even-vertical
       panes:

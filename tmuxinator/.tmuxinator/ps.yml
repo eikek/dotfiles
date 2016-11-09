@@ -12,7 +12,6 @@ attach: false
 # post: tmux -CC attach -t bc1
 
 windows:
-  - sbt: sbt
   - bcrun:
       layout: even-vertical
       panes:
