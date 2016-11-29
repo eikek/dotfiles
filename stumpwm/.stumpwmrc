@@ -160,7 +160,7 @@ DISPLAY defines the display to use, default is ':1.0'."
 ;;;;;;;; screenshot once a year
 (defun screenshot (&optional (dir "/tmp/") (root nil))
   (let* ((file (concat dir (concat (s-trim (exec "date +\"%Y%m%d-%H%M%S\"" t)) ".jpg")))
-         (cmd (format nil "XCURSOR_THEME=redglass xwd ~a | convert - ~a"
+         (cmd (format nil "XCURSOR_THEME=redglass nix-shell -p imagemagick695 --run 'xwd ~a | convert - ~a'"
                       (if root "-root" "-screen")
                       file)))
     (exec cmd t)
