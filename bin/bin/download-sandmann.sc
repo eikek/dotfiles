@@ -6,23 +6,27 @@
 
 import ammonite.ops._
 import $file.`mediathekdb`
-import mediathekdb.Show
+import mediathekdb.{Filter, Show}
+import mediathekdb.Filter._
+
+def unserSandmann: Filter =
+  stationIs("ARD") &&
+  titleContains("sandmännchen") &&
+  shorterThanMin(9)
 
 @main
 def main(target: Path, n: Int = 1): Unit = {
-  implicit val wd = target
-  mediathekdb.allShows.filter(Show.unserSandmann).take(n).foreach { show =>
-    val out = target/RelPath(show.fileName)
-    if (exists(out)) println(s"$out already exists")
-    else {
-      mkdir(out/up)
-      println(s"Download '${show.title}' to $out …")
-      %curl ("-L", "-o", out.toString, show.url)
-    }
-  }
+  mediathekdb.allShows
+    .filter(unserSandmann.f)
+    .take(n)
+    .foreach(mediathekdb.curl(target))
 }
 
 @main
 def test(n: Int = 1): Unit = {
-  println(mediathekdb.allShows.filter(Show.unserSandmann).take(n).toList.mkString("\n"))
+  mediathekdb.allShows
+    .filter(unserSandmann.f)
+    .take(n)
+    .map(_.asString)
+    .foreach(println)
 }

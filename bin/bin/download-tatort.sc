@@ -9,7 +9,8 @@ import ammonite.ops._
 import scalaj.http._
 import java.time._
 import $file.`mediathekdb`
-import mediathekdb.Show
+import mediathekdb.{Filter, Show}
+import mediathekdb.Filter._
 
 class TvDb(apikey: String, userkey: String, username: String) {
   val tatortId = 83214
@@ -52,25 +53,35 @@ class TvDb(apikey: String, userkey: String, username: String) {
       s"${date.getYear}/s${date.getYear}e${data("airedEpisodeNumber")}_${Show.normalizeFilename(data("episodeName").toString)}.mp4"
     }
   }).toOption.flatten
-
 }
+
+def sonntagsTatort: Filter =
+  stationIs("ARD") &&
+  subjectIs("tatort") &&
+  !titleContains("hörfassung") &&
+  dayIs(DayOfWeek.SUNDAY) &&
+  longerThanMin(60)
 
 @main
 def main(target: Path, apikey: String, userkey: String, username: String, n: Int = 1): Unit = {
   implicit val wd = target
   val db = new TvDb(apikey, userkey, username)
-  mediathekdb.allShows.filter(Show.sonntagsTatort).take(n).foreach { show =>
+  mediathekdb.allShows.filter(sonntagsTatort.f).take(n).foreach { show =>
     val out = target/RelPath(db.fileName(show).getOrElse(show.fileName))
     if (exists(out)) println(s"$out already exists")
     else {
       mkdir(out/up)
       println(s"Download '${show.title}' to $out …")
-      %curl ("-L", "-o", out.toString, show.url)
+      %curl("-L", "-o", out.toString, show.url)
     }
   }
 }
 
 @main
 def test(n: Int = 1): Unit = {
-  println(mediathekdb.allShows.filter(Show.sonntagsTatort).take(n).toList)
+  mediathekdb.allShows
+    .filter(sonntagsTatort.f)
+    .take(n)
+    .map(_.asString)
+    .foreach(println)
 }

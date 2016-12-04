@@ -1,7 +1,5 @@
 #!/usr/bin/env amm
 
-// Creates a sqlite database of current mediathek movies
-
 import $ivy.`com.h2database:h2:1.4.193`
 import $ivy.`org.tukaani:xz:1.6`
 import java.io.{InputStreamReader, BufferedReader}
@@ -23,21 +21,6 @@ val listUrl = "http://download10.onlinetvrecorder.com/mediathekview/Filmliste-ak
 val tmp = Path(System.getProperty("java.io.tmpdir"))
 val defaultListTarget = tmp/"filmlist.xz"
 val defaultDbTarget = tmp/"filmlist.h2.db"
-
-//"Filmliste" : [ "Sender", "Thema", "Titel", "Datum", "Zeit",
-//  "Dauer", "Größe [MB]", "Beschreibung", "Url", "Website", "Url
-//  Untertitel", "Url RTMP", "Url Klein", "Url RTMP Klein", "Url HD",
-//  "Url RTMP HD", "DatumL", "Url History", "Geo", "neu" ]
-// Bsp: "X" : [
-//  "3Sat", "3sat", "Ein Eingang für die Ewigkeit © Alina Rapoport,
-//  ZDF", "26.11.2016", "21:45:00", "00:44:39", "767", "\"Architektur
-//  muss eine Vision haben, wie die Gesellschaft sein soll\", sagt
-//  David Chipperfield. Der britische Stararchitekt baut gerade an
-//  einem neuen Berliner Wah rzeichen: der...",
-//  "http://nrodl.zdf.de/none/3sat/16/11/161126_doku_eingang_online/1/161126_doku_eingang_online_2328k_p35v13.mp4",
-//  "http://www.3s at.de/mediathek/?mode=play&obj=62844", "", "",
-//  "7|rodl.zdf.de/none/3sat/16/11/161126_doku_eingang_online/1/161126_doku_eingang_online_476k_p9v13. mp4",
-//  "", "92|3328k_p36v13.mp4", "", "1480193100", "", "", "false" ],
 
 case class Show(
   station: String,
@@ -61,8 +44,8 @@ case class Show(
   geo: String,
   newItem: Boolean) {
 
-
   def fileName = Show.normalizeFilename(s"$subject-$title${date.map(d => "-"+d).getOrElse("")}.mp4")
+  def asString = s"[$station] $subject: $title (${duration.map(_.toString).getOrElse("-:-:-")}; ${dateL.map(_.toString).getOrElse("")})"
 }
 
 object Show {
@@ -106,19 +89,61 @@ object Show {
           t == "true"))
       case _ => None
     }
+}
 
+case class Filter(f: Show => Boolean) {
+  def &&(n: Filter): Filter = Filter(show => f(show) && n.f(show))
+  def ||(n: Filter): Filter = Filter(show => f(show) || n.f(show))
+  def negate: Filter = Filter(show => !f(show))
+  def unary_! : Filter = negate
+}
 
-  def sonntagsTatort(s: Show): Boolean =
-    s.station == "ARD" &&
-    s.subject.toLowerCase == "tatort" &&
-    !s.title.toLowerCase.contains("hörfassung") &&
-    s.date.map(_.getDayOfWeek) == Some(DayOfWeek.SUNDAY) &&
-    s.duration.map(_.toMinutes > 60) == Some(true)
+object Filter {
+  val TRUE = Filter(_ => true)
 
-  def unserSandmann(s: Show): Boolean =
-    s.station == "ARD" &&
-    s.title.toLowerCase.contains("sandmännchen") &&
-    s.duration.map(_.toMinutes < 9) == Some(true)
+  def longerThanMin(n: Int): Filter = Filter { s =>
+    s.duration.exists(_.toMinutes > n)
+  }
+
+  def shorterThanMin(n: Int): Filter = Filter { s =>
+    s.duration.exists(_.toMinutes < n)
+  }
+
+  def stationIs(name: String): Filter = Filter { s =>
+    s.station.toLowerCase == name.toLowerCase
+  }
+
+  def subjectIs(w: String): Filter =
+    Filter(s => s.subject.toLowerCase == w.toLowerCase)
+
+  def dayIs(dow: DayOfWeek): Filter = Filter { s =>
+    s.date.map(_.getDayOfWeek) == Some(dow)
+  }
+
+  def titleContains(w: String): Filter = Filter { s =>
+    s.title.toLowerCase.contains(w.toLowerCase)
+  }
+
+  def contains(name: String): Filter = Filter({ s =>
+    val nameL = name.toLowerCase
+    s.title.toLowerCase.contains(nameL) ||
+    s.subject.toLowerCase.contains(nameL)
+  })
+
+  def query(q: Seq[String]): Filter =
+    q.foldLeft(TRUE) { (f, s) =>
+      f && (s match {
+        case w if w.startsWith("station:-") => stationIs(w.substring(9).trim).negate
+        case w if w.startsWith("station:") => stationIs(w.substring(8).trim)
+        case w if w.startsWith("subject:-") => subjectIs(w.substring(9).trim).negate
+        case w if w.startsWith("subject:") => subjectIs(w.substring(8).trim)
+        case w if w.startsWith("<") => shorterThanMin(w.substring(1).toInt)
+        case w if w.startsWith(">") => longerThanMin(w.substring(1).toInt)
+        case w if w.startsWith("!") => contains(w.substring(1)).negate
+        case w => contains(w)
+      })
+    }
+
 }
 
 def downloadList(target: Path = defaultListTarget): Path = {
@@ -137,10 +162,9 @@ def downloadList(target: Path = defaultListTarget): Path = {
     .asString
 
   if (isCurrent(head)) {
-    println("Movie list is current")
     target
   } else {
-    println("Downloading current movie list…")
+    println("Downloading movie list…")
     rm(target)
     Http(listUrl).execute(in => {
       Files.copy(in, target.toNIO)
@@ -148,7 +172,6 @@ def downloadList(target: Path = defaultListTarget): Path = {
     target
   }
 }
-
 
 def parseLine(line: String): Option[Js.Value] =
   line.trim.startsWith(""""X" : [""") match {
@@ -251,6 +274,7 @@ def writeToDatabase(state: State, show: Show): State = {
 
 // “public” interface
 
+/** Read the movie list into a H2 database. */
 def mediathekDB(target: Path = defaultDbTarget): Path = {
   val xz = downloadList()
   if (!exists(target) || target.mtime.toInstant.isBefore(xz.mtime.toInstant)) {
@@ -268,22 +292,55 @@ def mediathekDB(target: Path = defaultDbTarget): Path = {
   target
 }
 
-
+/** List all shows. Reads the movie file. */
 def allShows: Traversable[Show] =
   readXzShows(downloadList())
 
-
-@main
-def search: Unit = {
-  println {
-    allShows
-      .withFilter(Show.unserSandmann)
-      .map(_.url)
-      .take(20)
+/** Download a show using curl into `target' directory. */
+def curl(target: Path)(show: Show): Unit = {
+  implicit val wd = target
+  val out = target/RelPath(show.fileName)
+  if (exists(out)) println(s"$out already exists")
+  else {
+    mkdir(out/up)
+    println(s"Download '${show.title}' to $out …")
+    %curl ("-L", "-o", out.toString, show.url)
   }
 }
 
+/** Download results of applying `filter'. */
+def download(target: Path, filter: Filter): Unit = {
+  implicit val wd = target
+  allShows.withFilter(filter.f).foreach(curl(target))
+}
+
+/** Print search results */
 @main
-def mkdb(target: Path): Unit = {
-  mediathekDB(target/"movies.h2")
+def search(q: String*): Unit = {
+  allShows
+    .withFilter(Filter.query(q).f)
+    .map(_.asString)
+    .foreach(println)
+}
+
+/** Download search results */
+@main
+def download(q: String*): Unit = download(cwd, Filter.query(q))
+
+/** Create a H2 database of the movia data. */
+@main
+def mkdb(target: Path): Unit = mediathekDB(target/"movies.h2")
+
+/** Print head of movie list */
+@main
+def info(): Unit = {
+  val file = downloadList()
+  val xzin = new XZInputStream(Files.newInputStream(file.toNIO))
+  val r = new BufferedReader(new InputStreamReader(xzin, StandardCharsets.UTF_8))
+  try {
+    r.readLine
+    println(r.readLine)
+  } finally {
+    r.close
+  }
 }
