@@ -60,7 +60,7 @@ val parser = new scopt.OptionParser[Opts]("mongodb") {
 }
 
 def makeCommand(opts: Opts): Seq[String] = {
-  val cmd = List("mongod", "--noauth", "--dbpath", opts.mongoDataDir.pathAsString, "--port", opts.mongoPort.toString)
+  val cmd = List("mongod", "--dbpath", opts.mongoDataDir.pathAsString, "--port", opts.mongoPort.toString)
   MongoVersion.wrapCommand(opts.mongoVersion, cmd)
 }
 
