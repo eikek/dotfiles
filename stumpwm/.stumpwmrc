@@ -120,7 +120,8 @@ DISPLAY defines the display to use, default is ':1.0'."
 (define-key *root-map* (kbd "C-b") "ror-conkeror")
 (define-key *root-map* (kbd "C-f") "ror-firefox")
 (define-key *root-map* (kbd "C-c") "ror-chromium")
-(define-key *root-map* (kbd "C-d") "ror-idea")
+(if (string= "bluecare-n46" hostname)
+    (define-key *root-map* (kbd "C-d") "ror-idea"))
 (define-key *root-map* (kbd "C-t") "ror-htop")
 (define-key *root-map* (kbd "C-F12") "exec i3lock -c 000000")
 

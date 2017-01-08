@@ -43,7 +43,7 @@ compressed file (ogg, mp3) encountered, it is copied.""")
   }
 
   def mkDirs(file: File) {
-    val dir = file / `..`
+    val dir = file.parent
     if (!dir.isDirectory) {
       dir.createDirectories()
     }
