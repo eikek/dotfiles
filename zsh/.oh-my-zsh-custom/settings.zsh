@@ -19,6 +19,10 @@ if [ -d $ZSH_CUSTOM/base16-shell ]; then
     [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
 fi
 
+restart() {
+    tmuxinator stop $1 && tmuxinator start $1
+}
+
 # alias
 alias vim='emacsclient -nw'
 alias vi='emacsclient -nw'
