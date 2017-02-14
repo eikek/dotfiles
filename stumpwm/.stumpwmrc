@@ -614,7 +614,7 @@ frame according to the golden-ratio value."
             '(:eval (battery-line))
             " ^7%w"
             "^> ^5*"
-            '(:eval (get-task-info))
+;            '(:eval (get-task-info))
             " ^n<"
             '(:eval (group-name (current-group)))
             ">"))
