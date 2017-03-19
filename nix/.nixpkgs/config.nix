@@ -5,4 +5,6 @@ in
   packageOverrides =
     if (!builtins.pathExists mypkgs) then p: p
     else import mypkgs;
+
+  allowUnfree = true;
 }
