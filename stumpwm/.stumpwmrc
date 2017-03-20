@@ -557,11 +557,15 @@ frame according to the golden-ratio value."
 (load-module "amixer")
 (load-module "net")
 
-(when (or (equal hostname "nyx") (equal hostname "lenni"))
+(when (or (equal hostname "nyx")
+          (equal hostname "lenni")
+          (equal hostname "kythira"))
   (load-module "battery-portable"))
 
 (defun battery-line ()
-  (if (or (equal hostname "nyx") (equal hostname "lenni"))
+  (if (or (equal hostname "nyx")
+          (equal hostname "lenni")
+          (equal hostname "kythira"))
       "[B%B]"
       ""))
 
