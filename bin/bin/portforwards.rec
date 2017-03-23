@@ -27,12 +27,6 @@ Port: 587
 Offset: 3000
 Sudo: no
 
-Name: git-eknet
-Host: git.eknet.org
-Port: 29418
-Offset: 0
-Sudo: no
-
 Name: jabber
 Host: eknet.org
 Port: 5222
