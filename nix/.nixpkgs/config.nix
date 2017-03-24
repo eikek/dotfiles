@@ -1,10 +1,11 @@
 let
-  mypkgs = ../workspace/projects/confnix/pkgs/default.nix;
+  mypkgs = [ ../.confnix/pkgs/default.nix ../workspace/projects/confnix/pkgs/default.nix ];
+  pkgs = builtins.filter builtins.pathExists mypkgs;
 in
 {
   packageOverrides =
-    if (!builtins.pathExists mypkgs) then p: p
-    else import mypkgs;
+    if (pkgs == []) then p: p
+    else import (builtins.head pkgs);
 
   allowUnfree = true;
 }
