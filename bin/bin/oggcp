@@ -1,20 +1,20 @@
 #!/usr/bin/env scsh
 // see https://github.com/eikek/scsh
 
-// oggall -- convert dir structure to ogg, Eike Kettner, 2015
+// oggcp -- convert dir structure to ogg, Eike Kettner, 2015
 
-// oggall is free software: you can redistribute it and/or modify
+// oggcp is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published
 // by the Free Software Foundation, either version 3 of the License,
 // or (at your option) any later verpsn.
 
-// oggall is distributed in the hope that it will be useful, but
+// oggcp is distributed in the hope that it will be useful, but
 // WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 // General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with oggall. If not, see <http://www.gnu.org/licenses/>.
+// along with oggcp. If not, see <http://www.gnu.org/licenses/>.
 //
 /// Commentary:
 
@@ -29,7 +29,7 @@ object oggcp {
 
   case class Input(source: File = File("."), target: File = File("."))
   val parser = new scopt.OptionParser[Input]("oggenc") {
-    head("oggenc", "1.0")
+    head("oggcp", "1.0")
     note("""Convert uncompressed audio files to ogg. Traverse a source
 directory and put the ogg files in the given target directory. If a
 compressed file (ogg, mp3) encountered, it is copied.""")
