@@ -8,9 +8,11 @@ import scala.util.Try
 import ammonite.ops._
 import scalaj.http._
 import java.time._
-import $file.`mediathekdb`
-import mediathekdb.{Filter, Show}
-import mediathekdb.Filter._
+import fs2.Task
+import $file.`mediathekdb2`
+import mediathekdb2.Filter
+import mediathekdb2.data.Show
+import mediathekdb2.Filter._
 
 class TvDb(apikey: String, userkey: String, username: String) {
   val tatortId = 83214
@@ -66,7 +68,7 @@ def sonntagsTatort: Filter =
 def main(target: Path, apikey: String, userkey: String, username: String, n: Int = 1): Unit = {
   implicit val wd = target
   val db = new TvDb(apikey, userkey, username)
-  mediathekdb.allShows.filter(sonntagsTatort.f).take(n).foreach { show =>
+  mediathekdb2.movielist.get.filter(sonntagsTatort.f).take(n).evalMap(show => Task.delay {
     val out = target/RelPath(db.fileName(show).getOrElse(show.fileName))
     if (exists(out)) println(s"$out already exists")
     else {
@@ -74,14 +76,15 @@ def main(target: Path, apikey: String, userkey: String, username: String, n: Int
       println(s"Download '${show.title}' to $out …")
       %curl("-L", "-o", out.toString, show.url)
     }
-  }
+  }).run.unsafeRun
 }
 
 @main
 def test(n: Int = 1): Unit = {
-  mediathekdb.allShows
+  mediathekdb2.movielist.get
     .filter(sonntagsTatort.f)
     .take(n)
     .map(_.asString)
-    .foreach(println)
+    .evalMap(s => Task.delay(println(s)))
+    .run.unsafeRun
 }

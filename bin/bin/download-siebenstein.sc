@@ -1,7 +1,7 @@
 #!/usr/bin/env amm
 
 /*
- * Download the “Sandmännchen“
+ * Download the “Siebenstein“
  */
 
 import ammonite.ops._
@@ -11,15 +11,14 @@ import mediathekdb2.Filter
 import mediathekdb2.data.Show
 import mediathekdb2.Filter._
 
-def unserSandmann: Filter =
-  stationIs("ARD") &&
-  titleContains("sandmännchen") &&
-  shorterThanMin(9)
+def siebenstein: Filter =
+  contains("siebenstein") &&
+  longerThanMin(20)
 
 @main
 def main(target: Path, n: Int = 1): Unit = {
   mediathekdb2.movielist.get
-    .filter(unserSandmann.f)
+    .filter(siebenstein.f)
     .take(n)
     .evalMap(s => Task.delay(mediathekdb2.curl(target.toNIO)(s)))
     .run.unsafeRun
@@ -28,7 +27,7 @@ def main(target: Path, n: Int = 1): Unit = {
 @main
 def test(n: Int = 1): Unit = {
   mediathekdb2.movielist.get
-    .filter(unserSandmann.f)
+    .filter(siebenstein.f)
     .take(n)
     .map(_.asString)
     .evalMap(s => Task.delay(println(s)))
