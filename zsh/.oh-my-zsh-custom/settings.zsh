@@ -31,7 +31,7 @@ alias e='emacsclient'
 alias mc='mc --colors="normal=white,black:header=white,red:menunormal=white,color90"'
 alias mvni='mvn install -DskipTests=true -T1C'
 #alias nixq="nix-env -qaP | grep -i"
-alias playr="mplayer \"\$(find . -type f | perl -MList::Util=shuffle -e 'print shuffle(<STDIN>);' | tail -n 1)\""
+alias playr="mpv \"\$(find . -type f | perl -MList::Util=shuffle -e 'print shuffle(<STDIN>);' | tail -n 1)\""
 alias killsbt="ps aux|grep sbt |grep -v grep| awk '{print \$2}' |xargs kill -9"
 alias tess='tesseract stdin stdout -l deu -psm 1 --tessdata-dir /run/current-system/sw/share/tessdata < '
 alias mux='tmuxinator'
