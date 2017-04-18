@@ -194,16 +194,16 @@ DISPLAY defines the display to use, default is ':1.0'."
 
 (defcommand ek/vol-up ()()
   (cond
-   ((string= hostname "ithaka")
-    (progn (volcontrol nil "DAC" "2%+")
-           (Volcontrol nil "DAC,1" "2%+")))
+   ((string= hostname "kythira")
+    (progn (volcontrol nil "PCM" "2%+")
+           (Volcontrol nil "PCM" "2%+")))
    (t (Volcontrol nil "Master" "2%+"))))
 
 (defcommand ek/vol-down ()()
   (cond
-   ((string= hostname "ithaka")
-    (progn (volcontrol nil "DAC" "2%-")
-           (Volcontrol nil "DAC,1" "2%-")))
+   ((string= hostname "kythira")
+    (progn (volcontrol nil "PCM" "2%-")
+           (Volcontrol nil "PCM" "2%-")))
    (t (Volcontrol nil "Master" "2%-"))))
 
 (define-key *top-map* (kbd "XF86AudioLowerVolume") "ek/vol-down")
