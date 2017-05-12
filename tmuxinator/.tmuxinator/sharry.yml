@@ -1,7 +1,7 @@
-# ~/.tmuxinator/bc2.yml
+# ~/.tmuxinator/bc1.yml
 
-name: bc2
-root: ~/workspace/projects/larnags/larnags2
+name: sharry
+root: ~/workspace/projects/sharry
 
 # Optional tmux socket
 # socket_name: foo
@@ -19,7 +19,7 @@ root: ~/workspace/projects/larnags/larnags2
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
-startup_window: 2
+# startup_window: 2
 
 # Controls whether the tmux session should be attached to automatically. Defaults to true.
 # attach: false
@@ -28,14 +28,7 @@ startup_window: 2
 # post: tmux -CC attach -t bc1
 
 windows:
-  - bcrun:
-      layout: even-vertical
-      panes:
-        - ./startCluster.sh | tee cluster.log
-        - ./startFrontend.sh | tee frontend.log
-  - grunt:
-      - cd static/main
-      - grunt
-  - logs:
-      panes:
-        - emacs -nw cluster.log
+  - sbt1:
+      - sbt "~compile"
+  - sbt2:
+      - sbt
