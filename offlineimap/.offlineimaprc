@@ -8,13 +8,11 @@ socktimeout = 30
 [Account eknet]
 localrepository = eknet-local
 remoterepository = eknet-remote
-status_backend = sqlite
 quick = 5
 
 [Account posteo]
 localrepository = posteo-local
 remoterepository = posteo-remote
-status_backend = sqlite
 quick = 5
 
 [Repository eknet-local]
