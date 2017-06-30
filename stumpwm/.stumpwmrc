@@ -146,6 +146,7 @@ DISPLAY defines the display to use, default is ':1.0'."
 
 (define-key *top-map* (kbd "XF86LaunchA") "exec reset-display")
 
+(define-key *top-map* (kbd "F12") "exec toggle-touchpad.sh")
 ;;;;;; background
 (exec "feh --bg-fill ~/.backgrounds/$(ls -1 ~/.backgrounds/ | shuf -n1)")
 
