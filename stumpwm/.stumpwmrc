@@ -43,19 +43,6 @@
   (remove-split))
 
 
-;;;;;; startup programs
-(defun run-startup-programs ()
-  ;;add more here…
-  )
-
-(defun kill-startup-programs ()
-  ;;add more here…
-  )
-
-(add-hook *start-hook* 'run-startup-programs)
-;(add-hook *quit-hook* 'kill-startup-programs)
-
-
 ;;;;;; program shortcuts
 (defcommand ror-terminal ()()
   (run-or-raise "xfce4-terminal" '(:class "Xfce4-terminal")))
@@ -547,21 +534,16 @@ frame according to the golden-ratio value."
 
 
 ;;;;;;;;-line
-;; (asdf:load-system "cpu")
-;; (asdf:load-system "net")
-;; (asdf:load-system "amixer")
+;;(load-module "util/stumptray")
 
-;;(load-module "stumptray")
-
-;(set-contrib-dir "/nix/store/xrvdkjlykiihxl9a0dhqs1xr8qqzgr6g-stumpwmContrib-0.9.8/contrib")
-(load-module "cpu")
-(load-module "amixer")
-(load-module "net")
+(load-module "modeline/cpu")
+(load-module "modeline/amixer")
+(load-module "modeline/net")
 
 (when (or (equal hostname "nyx")
           (equal hostname "lenni")
           (equal hostname "kythira"))
-  (load-module "battery-portable"))
+  (load-module "modeline/battery-portable"))
 
 (defun battery-line ()
   (if (or (equal hostname "nyx")
