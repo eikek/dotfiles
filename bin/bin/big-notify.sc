@@ -17,4 +17,8 @@ def main(msg: String): Unit = {
   f.getContentPane.setBackground(Color.BLACK)
   label.setForeground(Color.RED)
   f.setVisible(true)
+
+  while (true) {
+    Thread.sleep(100)
+  }
 }
