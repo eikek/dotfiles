@@ -54,7 +54,7 @@
   (run-or-raise "conkeror" '(:class "Conkeror")))
 
 (defcommand ror-chromium ()()
-  (run-or-raise "chromium" '(:class "chromium")))
+  (run-or-raise "chromium" '(:class "Chromium")))
 
 (defcommand ror-firefox ()()
   (run-or-raise "firefox" '(:class "Firefox")))
