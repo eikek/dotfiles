@@ -45,10 +45,10 @@
 
 ;;;;;; program shortcuts
 (defcommand ror-terminal ()()
-  (run-or-raise "xfce4-terminal" '(:class "Xfce4-terminal")))
+  (run-or-raise "alacritty" '(:class "Alacritty")))
 
 (defcommand ror-htop ()()
-  (run-or-raise "xfce4-terminal --title htop --command htop" '(:title "htop")))
+  (run-or-raise "alacritty --title htop --command htop" '(:title "htop")))
 
 (defcommand ror-conkeror ()()
   (run-or-raise "conkeror" '(:class "Conkeror")))
@@ -102,7 +102,7 @@ DISPLAY defines the display to use, default is ':1.0'."
 (define-key *root-map* (kbd "ESC") "abort")
 (define-key *root-map* (kbd "C-o") "other")
 (define-key *root-map* (kbd "q") "remove-split")
-(define-key *root-map* (kbd "c") "exec xfce4-terminal")
+(define-key *root-map* (kbd "c") "exec alacritty")
 (define-key *root-map* (kbd "C-e") "emacs")
 (define-key *root-map* (kbd "RET") "ror-terminal")
 (define-key *root-map* (kbd "C-RET") "ror-terminal")
