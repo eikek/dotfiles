@@ -20,7 +20,7 @@ if [ -d $ZSH_CUSTOM/base16-shell ]; then
 fi
 
 restart() {
-    tmuxinator stop $1 && tmuxinator start $1
+    tmuxinator stop $1 && sleep 1 && tmuxinator start $1
 }
 
 # alias
