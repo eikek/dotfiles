@@ -29,6 +29,6 @@ attach: false
 
 windows:
   - sbt1:
-      - sbt -Dsbt.watch.model=polling
-  - sbt2:
-      - sbt -Dsbt.watch.model=polling
+      - sbt
+  - test:
+      -
