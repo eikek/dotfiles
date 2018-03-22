@@ -60,8 +60,7 @@ object h264enc extends FileTransformProcess[Config] {
   def parser = new BulkFileParser[Config]("h264enc") {
     head("h264enc", "1.0")
     note("Encodes video files with ffmpeg and h264 codec. Audio tracks are\n"+
-      "copied if it is not stereo (but i.e. 5.1). Stereo audio tracks\n"+
-      "are encoded with libvorbis. The output file is mkv.\n")
+      "copied. The output file is mkv.\n")
 
     opt[Int]("crf") optional() valueName("[0-50]") action { (x, c) =>
       c.copy(crf = x)
@@ -113,9 +112,9 @@ object h264enc extends FileTransformProcess[Config] {
       })
 
     val mapOpt = streams.flatMap(t => List("-map", "0:a:" + t._2))
-    val audioCodec =
-      if (streams.forall(t => t._1.details.toLowerCase.contains("stereo"))) Seq("libvorbis", "-qscale:a", "7")
-      else Seq("copy")
+    val audioCodec = Seq("copy")
+      // if (streams.forall(t => t._1.details.toLowerCase.contains("stereo") && !t._1.details.toLowerCase.contains("flac"))) Seq("flac")
+      // else Seq("copy")
 
     val crop = cfg.crop.map(x => Seq("-vf", "crop=" + x)).getOrElse(Seq())
     val scale = cfg.scale.map(x => Seq("-s", x)).getOrElse(Seq())
