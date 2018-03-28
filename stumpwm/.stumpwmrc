@@ -169,12 +169,11 @@ DISPLAY defines the display to use, default is ':1.0'."
 ;; by the macro don't work and it is not possible to call this
 ;; function because of "Not exteranlized in amixer".
 (defun volcontrol (device channel amount)
-  (let ((percent (parse-integer
-                  (run-shell-command
-                   (concat "amixer -D " (or device "default") " sset " channel " " (or amount "toggle")
-                           "| tail -1"
-                           "| sed 's/^.*\\[\\([[:digit:]]\\+\\)%\\].*$/\\1/'")
-                   t))))
+  (let* ((cmdstr (concat "amixer -D " (or device "default") " sset " channel " " (or amount "toggle")
+                         "| tail -1"
+                         "| sed 's/^.*\\[\\([[:digit:]]\\+\\)%\\].*$/\\1/'"))
+         (percent (parse-integer
+                   (run-shell-command cmdstr t))))
     (message
      (concat "Mixer: " channel " " (or amount "toggled")
              (format nil "~C^B~A%" #\Newline percent) "^b [^[^7*"
@@ -184,15 +183,15 @@ DISPLAY defines the display to use, default is ':1.0'."
   (cond
    ((string= hostname "kythira")
     (progn (volcontrol nil "PCM" "2%+")
-           (Volcontrol nil "PCM" "2%+")))
-   (t (Volcontrol nil "Master" "2%+"))))
+           (volcontrol nil "PCM" "2%+")))
+   (t (volcontrol nil "Master" "2%+"))))
 
 (defcommand ek/vol-down ()()
   (cond
    ((string= hostname "kythira")
     (progn (volcontrol nil "PCM" "2%-")
-           (Volcontrol nil "PCM" "2%-")))
-   (t (Volcontrol nil "Master" "2%-"))))
+           (volcontrol nil "PCM" "2%-")))
+   (t (volcontrol nil "Master" "2%-"))))
 
 (define-key *top-map* (kbd "XF86AudioLowerVolume") "ek/vol-down")
 (define-key *top-map* (kbd "XF86AudioRaiseVolume") "ek/vol-up")
