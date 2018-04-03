@@ -5,12 +5,31 @@ import $ivy.`co.fs2::fs2-core:0.10.3`
 
 import fs2._
 import cats._, cats.effect._, cats.implicits._
+import scopt.Read
 import ammonite.ops._
+
+sealed trait FileAction
+object FileAction {
+  case object Copy extends FileAction
+  case object Symlink extends FileAction
+  case object Hardlink extends FileAction
+  case object Skip extends FileAction
+
+  implicit val scoptRead: Read[FileAction] =
+    Read.reads(s => s.toLowerCase match {
+      case "copy" => Copy
+      case "symlink" => Symlink
+      case "hardlink" => Hardlink
+      case "skip" => Skip
+      case _ => sys.error(s"Invalid file action: $s. Use one of: copy,symlink,hardlink or skip")
+    })
+}
 
 @main
 def main(in: Path @doc("A single music file or a path")
   , out: Path @doc("A path to put the created files into. Maybe a single file if `in` is, too.")
   , parallel: Boolean @doc("Whether to convert using all cores") = false
+  , rest: FileAction @doc("What to do with files that are already fine or lossy encoded.") = FileAction.Skip
   , ogg: Boolean @doc("Convert all to ogg (16/44). Default is to flac, resampling to 16/44 if necessary.") = false
   , oggQuality: Int @doc("If `ogg` is used, this is the quality for encoding") = 8): Unit = {
   implicit val wd = pwd
@@ -19,55 +38,43 @@ def main(in: Path @doc("A single music file or a path")
     sys.error(s"Directory or file $in doesn't exist")
   }
 
-  val task: Stream[IO, (MediaInfo, Path)] =
-    createMainTask[IO](in, out, ogg, oggQuality)
+  val task: Stream[IO, Either[Throwable, (MediaInfo, Path)]] =
+    createMainTask[IO](in, out, rest, ogg, oggQuality)
 
   task.
-    attempt.
     to(printSink).
     compile.drain.unsafeRunSync
-  // val in = pwd/"test.flac"
-  // val out = pwd/"test.ogg"
-  // val out2 = pwd/"test-resampled.flac"
-
-  // val conv = for {
-  //   fi  <- MediaInfo[IO](in)
-  //   _   <- fi.toFlac[IO](out2)
-  // } yield ()
-  // conv.unsafeRunSync
 }
 
 def createMainTask[F[_]: Sync](in: Path
   , out: Path
+  , rest: FileAction
   , ogg: Boolean
-  , quality: Int)(implicit wd: Path): Stream[F, (MediaInfo, Path)] =
+  , quality: Int)(implicit wd: Path): Stream[F, Either[Throwable, (MediaInfo, Path)]] = {
+
+  def convert(mi: MediaInfo): F[(MediaInfo, Path)] = {
+    val outFile = makeOutFile(mi, in, out, ogg)
+    val conv =
+      if (ogg) mi.toOgg(outFile, quality, rest)
+      else mi.toFlac(outFile, rest)
+    for {
+      _  <- checkOutFile(outFile)
+      _  <- conv
+    } yield (mi, outFile)
+  }
+
   if (stat(in).isDir) {
     Stream.eval(Sync[F].delay(mkdir.!(out))) >>
     Stream.emit(in).covary[F].
       through(listFiles).
       filter(inputFilter).
-      evalMap(MediaInfo.apply[F]).
-      evalMap({ mi =>
-        val outFile = makeOutFile(mi, in, out, ogg)
-        checkOutFile(outFile).map(_ => (mi, outFile))
-      }).
-      evalMap({ case (mi, outFile) =>
-        val conv =
-          if (ogg) mi.toOgg(outFile, quality)
-          else mi.toFlac(outFile)
-        conv.map(_ => (mi, outFile))
-      })
+      evalMap(file => MediaInfo(file).flatMap(convert).attempt)
   } else {
     Stream.eval {
-      for {
-        mi      <- MediaInfo(in)
-        outFile <- Sync[F].delay(makeOutFile(mi, in, out, ogg))
-        _       <- checkOutFile(outFile)
-        _       <- Sync[F].delay(print(s"Converting ${mi.file} -> $outFile"))
-        _       <- if (ogg) mi.toOgg(outFile, quality) else mi.toFlac(outFile)
-      } yield (mi, outFile)
+      MediaInfo(in).flatMap(convert).attempt
     }
   }
+}
 
 def inputFilter(in: Path): Boolean =
   stat(in).isFile && MediaInfo.Format.all.contains(in.ext.toLowerCase)
@@ -107,9 +114,34 @@ def printSink[F[_]]: Sink[F, Either[Throwable, (MediaInfo, Path)]] =
   _.map({
     case Right((in, out)) => println(s"Transcode ${in.file} to $out")
     case Left(err) =>
-      ///err.printStackTrace()
+      //err.printStackTrace()
       println(s"Skipped: ${err.getMessage}")
   })
+
+def fileActionImpl[F[_]](in: Path, out: Path, action: FileAction)(implicit F: Sync[F]): F[Unit] = {
+  F.delay {
+    action match {
+      case FileAction.Skip =>
+        println(s"Skipping file $in")
+
+      case FileAction.Copy =>
+        println(s"Copying file $in to $out")
+        mkdir.!(out/up)
+        cp(in, out)
+
+      case FileAction.Symlink =>
+        println(s"Symlink file $in to $out")
+        mkdir.!(out/up)
+        ln.s(in, out)
+
+      case FileAction.Hardlink =>
+        println(s"Hardlink file $in to $out")
+        mkdir.!(out/up)
+        ln(in, out)
+    }
+  }
+}
+
 
 case class MediaInfo(
   file: Path
@@ -131,35 +163,41 @@ case class MediaInfo(
         None
     }
 
-  def toOgg[F[_]: Sync](out: Path, quality: Int)(implicit wd: Path): F[Unit] = Sync[F].delay {
-    mkdir.!(out/up)
-    if (format.lossy) cp(file, out)
+  def toOgg[F[_]: Sync](out: Path, quality: Int, rest: FileAction)(implicit wd: Path): F[Unit] = {
+    if (format.lossy) fileActionImpl(file, out, rest)
     else audioFilter match {
       case Some(af) =>
-        %("avconv", "-i", file
-          , "-vn", "-sn"
-          , "-af", s"aformat=$af"
-          , "-map_metadata:s:a", "0:s:0"
-          , "-codec:a", "libvorbis"
-          , "-f", "ogg"
-          , "-q:a", quality
-          , out)
+        Sync[F].delay {
+          mkdir.!(out/up)
+          %("avconv", "-i", file
+            , "-vn", "-sn"
+            , "-af", s"aformat=$af"
+            , "-map_metadata:s:a", "0:s:0"
+            , "-codec:a", "libvorbis"
+            , "-f", "ogg"
+            , "-q:a", quality
+            , out)
+        }
       case None =>
-        %("avconv", "-i", file
-          , "-vn", "-sn"
-          , "-map_metadata:s:a", "0:s:0"
-          , "-codec:a", "libvorbis"
-          , "-f", "ogg"
-          , "-q:a", quality
-          , out)
+        Sync[F].delay {
+          mkdir.!(out/up)
+          %("avconv", "-i", file
+            , "-vn", "-sn"
+            , "-map_metadata:s:a", "0:s:0"
+            , "-codec:a", "libvorbis"
+            , "-f", "ogg"
+            , "-q:a", quality
+            , out)
+        }
     }
   }
 
-  def toFlac[F[_]](out: Path)(implicit wd: Path, F: Sync[F]): F[Unit] = {
-    if (format.lossy) F.delay(mkdir.!(out/up)) *> F.delay(cp(file, out))
+  def toFlac[F[_]](out: Path, rest: FileAction)(implicit wd: Path, F: Sync[F]): F[Unit] = {
+    if (format.lossy) fileActionImpl(file, out, rest)
     else audioFilter match {
       case Some(af) =>
         val conv = F.delay {
+          mkdir.!(out/up)
           %("avconv", "-i", file
           , "-vn", "-sn"
           , "-af", s"aformat=$af"
@@ -168,14 +206,11 @@ case class MediaInfo(
         }
         for {
           _  <- F.delay(println(s"Converting flac to 16/44: $this -> $out ..."))
-          _  <- F.delay(mkdir.!(out/up))
           _  <- conv
           _  <- FlacOps.copyCover(this, out)
         } yield ()
       case None =>
-        F.delay(println(s"Copying flac file to $out")) *>
-        F.delay(mkdir.!(out/up)) *>
-        F.delay(cp(file, out))
+        fileActionImpl(file, out, rest)
     }
   }
 }
