@@ -1,10 +1,19 @@
 #!/usr/bin/env nix-shell
-#! nix-shell -i amm -p mediainfo -p libav
+#! nix-shell -i amm -p mediainfo -p ffmpeg
+
+// https://codecs.multimedia.cx/2011/10/why-ffmpeg-is-better-than-libav-by-numbers-but-not-in-reality/
+// http://blog.pkh.me/p/13-the-ffmpeg-libav-situation.html
+// using ffmpeg, not avconv
+
+// The „get a picture into an ogg file” is from here
+// https://github.com/biapy/howto.biapy.com/blob/master/various/mussync-tools
 
 import $ivy.`co.fs2::fs2-core:0.10.3`
+import $ivy.`org.apache.tika:tika-core:1.17`
 
 import fs2._
 import cats._, cats.effect._, cats.implicits._
+import org.apache.tika.config.TikaConfig
 import scopt.Read
 import ammonite.ops._
 
@@ -169,7 +178,7 @@ case class MediaInfo(
       case Some(af) =>
         Sync[F].delay {
           mkdir.!(out/up)
-          %("avconv", "-i", file
+          %("ffmpeg", "-i", file
             , "-vn", "-sn"
             , "-af", s"aformat=$af"
             , "-map_metadata:s:a", "0:s:0"
@@ -181,7 +190,7 @@ case class MediaInfo(
       case None =>
         Sync[F].delay {
           mkdir.!(out/up)
-          %("avconv", "-i", file
+          %("ffmpeg", "-i", file
             , "-vn", "-sn"
             , "-map_metadata:s:a", "0:s:0"
             , "-codec:a", "libvorbis"
@@ -198,7 +207,7 @@ case class MediaInfo(
       case Some(af) =>
         val conv = F.delay {
           mkdir.!(out/up)
-          %("avconv", "-i", file
+          %("ffmpeg", "-i", file
           , "-vn", "-sn"
           , "-af", s"aformat=$af"
           , "-map_metadata", "0:g"
@@ -285,11 +294,26 @@ object FlacOps {
         }
         
       case (Flac, Ogg) =>
-        Sync[F].delay(println("Flac2Ogg cover not implemented"))
+        Sync[F].delay {
+          println("sCannot copy cover art to ogg file: ${from.file} -> ${to.file}")
+          // println(s"Copy cover from ${from.file} to ${to.file}")
+          // val coverFile = tmp()
+          // %("metaflac", "--export-picture-to", coverFile, from.file)
+
+        }
 
       case _ =>
         Sync[F].delay(println(s"Cannot copy cover art from ${from.file} to ${to.file}"))
     }
   }
+}
+
+object Mimetype {
+  private val tika = new TikaConfig().getDetector
+
+
+  def from(path: Path): Option[String] =
+    None
+ 
 }
 
