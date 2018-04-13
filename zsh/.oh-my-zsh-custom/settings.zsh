@@ -36,6 +36,8 @@ alias killsbt="ps aux|grep sbt |grep -v grep| awk '{print \$2}' |xargs kill -9"
 alias tess='tesseract stdin stdout -l deu -psm 1 --tessdata-dir /run/current-system/sw/share/tessdata < '
 alias mux='tmuxinator'
 alias pill-nas='PILL_OPTS="-Dpill.cli.endpoint=http://nas:10549" pill'
+alias mpvu='mpv --audio-device=alsa/iec958:CARD=X5,DEV=0'
+
 rwhich() { readlink -e $(which $1) }
 
 if [ grep -i nixos /etc/os-release > /dev/null 2> /dev/null ]; then
