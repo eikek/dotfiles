@@ -7,3 +7,6 @@
 [submodule "zsh/.oh-my-zsh"]
 	path = zsh/.oh-my-zsh
 	url = https://github.com/robbyrussell/oh-my-zsh.git
+[submodule "spark/spark"]
+	path = spark/spark
+	url = https://github.com/holman/spark
