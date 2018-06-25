@@ -181,14 +181,14 @@ DISPLAY defines the display to use, default is ':1.0'."
 
 (defcommand ek/vol-up ()()
   (cond
-   ((string= hostname "kythira")
+   ((string= hostname "")
     (progn (volcontrol nil "PCM" "2%+")
            (volcontrol nil "PCM" "2%+")))
    (t (volcontrol nil "Master" "2%+"))))
 
 (defcommand ek/vol-down ()()
   (cond
-   ((string= hostname "kythira")
+   ((string= hostname "")
     (progn (volcontrol nil "PCM" "2%-")
            (volcontrol nil "PCM" "2%-")))
    (t (volcontrol nil "Master" "2%-"))))
@@ -582,7 +582,6 @@ frame according to the golden-ratio value."
                                     "| sed 's/^.*\\[\\([[0-9]\\+\\)%\\].*$/\\1/'")
                             t))
               "%")))
-
 
 
 (setf *mode-line-screen-position* :top)
