@@ -5,5 +5,5 @@ thing=$1
 shift
 
 while (true); do
-    inotifywait -r "$thing" && $@
+    inotifywait -r -e close_write "$thing" && $@
 done
