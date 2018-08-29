@@ -358,39 +358,39 @@ user. The focus is left on the current frame."
 (define-key *mpc-keymap* (kbd "n") "mpc-next")
 (define-key *mpc-keymap* (kbd "l") "mpc-playlist")
 
-;;(define-key *top-map* (kbd "F12") "mpc-mode")
+(define-key *top-map* (kbd "XF86AudioPlay") "mpc-toggle")
+(define-key *top-map* (kbd "F12") "mpc-mode")
 
 ;;;;;; emms integration
-;; switched to emms
 
-(defcommand emms-show-current ()()
-  (keys-to-emacs '("F12" "c")))
+;; (defcommand emms-show-current ()()
+;;   (keys-to-emacs '("F12" "c")))
 
-(defcommand emms-toggle ()()
-  (keys-to-emacs '("F12" "p")))
+;; (defcommand emms-toggle ()()
+;;   (keys-to-emacs '("F12" "p")))
 
-(defcommand emms-next ()()
-  (keys-to-emacs '("F12" "n")))
+;; (defcommand emms-next ()()
+;;   (keys-to-emacs '("F12" "n")))
 
-(defcommand emms-mode ()()
-  "Enables emms mode."
-  (unless (eq *emms-keymap* *top-map*)
-    (push-top-map *emms-keymap*)
-    (echo "Emms mode enabled")))
+;; (defcommand emms-mode ()()
+;;   "Enables emms mode."
+;;   (unless (eq *emms-keymap* *top-map*)
+;;     (push-top-map *emms-keymap*)
+;;     (echo "Emms mode enabled")))
 
-(defcommand emms-mode-exit ()()
-  "Exists emms mode"
-  (when (eq *emms-keymap* *top-map*)
-    (pop-top-map)
-    (echo "emms mode disabled")))
+;; (defcommand emms-mode-exit ()()
+;;   "Exists emms mode"
+;;   (when (eq *emms-keymap* *top-map*)
+;;     (pop-top-map)
+;;     (echo "emms mode disabled")))
 
-(defvar *emms-keymap* (make-sparse-keymap))
-(define-key *emms-keymap* (kbd "F12") "emms-toggle")
-(define-key *emms-keymap* (kbd "RET") "emms-mode-exit")
-(define-key *emms-keymap* (kbd "SPC") "emms-show-current")
-(define-key *emms-keymap* (kbd "x") "ek/vol-up")
-(define-key *emms-keymap* (kbd "v") "ek/vol-down")
-(define-key *emms-keymap* (kbd "n") "emms-next")
+;; (defvar *emms-keymap* (make-sparse-keymap))
+;; (define-key *emms-keymap* (kbd "F12") "emms-toggle")
+;; (define-key *emms-keymap* (kbd "RET") "emms-mode-exit")
+;; (define-key *emms-keymap* (kbd "SPC") "emms-show-current")
+;; (define-key *emms-keymap* (kbd "x") "ek/vol-up")
+;; (define-key *emms-keymap* (kbd "v") "ek/vol-down")
+;; (define-key *emms-keymap* (kbd "n") "emms-next")
 
 ;(define-key *top-map* (kbd "F12") "emms-mode")
 ;(define-key *top-map* (kbd "XF86AudioPlay") "emms-toggle")
@@ -402,6 +402,7 @@ user. The focus is left on the current frame."
 
 (setq *common-passwords*
   '(("bluecare" . "bluecare/login")
+    ("aspectra" . "bluecare/aspectra-js")
     ("http://eknet.org" . "eknet.org/www")
     ("github" . "devel/github")
     ("magnatune" . "internet/magnatune")
