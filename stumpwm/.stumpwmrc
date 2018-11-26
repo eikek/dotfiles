@@ -536,14 +536,14 @@ frame according to the golden-ratio value."
 ;;;;;;;;-line
 ;;(load-module "util/stumptray")
 
-(load-module "modeline/cpu")
-(load-module "modeline/amixer")
-(load-module "modeline/net")
+;;(load-module "modeline/cpu")
+;;(load-module "modeline/amixer")
+;;(load-module "modeline/net")
 
-(when (or (equal hostname "nyx")
-          (equal hostname "lenni")
-          (equal hostname "kythira"))
-  (load-module "modeline/battery-portable"))
+;; (when (or (equal hostname "nyx")
+;;           (equal hostname "lenni")
+;;           (equal hostname "kythira"))
+;;   (load-module "modeline/battery-portable"))
 
 (defun battery-line ()
   (if (or (equal hostname "nyx")
@@ -596,10 +596,10 @@ frame according to the golden-ratio value."
 (setf *screen-mode-line-format*
       (list "^n"
             '(:eval (current-date))
-            " ^2%c%l"
-            '(:eval (volume))
+;            " ^2%c%l"
+;            '(:eval (volume))
             " "
-            '(:eval (battery-line))
+;            '(:eval (battery-line))
             " ^7%w"
             "^> ^5*"
 ;            '(:eval (get-task-info))
