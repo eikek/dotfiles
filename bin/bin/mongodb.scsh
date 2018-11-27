@@ -1,5 +1,9 @@
-#!/usr/bin/env scsh
+#!/usr/bin/env amm
 
+import $ivy.`com.github.scopt::scopt:3.7.0`
+import $ivy.`com.github.pathikrit::better-files:3.6.0`
+
+import ammonite.ops._
 import better.files._
 import scala.sys.process._
 import scala.concurrent.Future
@@ -19,7 +23,7 @@ object MongoVersion {
   }
 }
 
-val mypwd = File(System.getenv("SCSH_SCALA_SCRIPT")).parent
+val mypwd = File(pwd.toNIO) //File(System.getenv("SCSH_SCALA_SCRIPT")).parent
 
 case class Opts(
   mongoVersion: MongoVersion = MongoVersion.Current,
@@ -85,15 +89,18 @@ def submitImportData(opts: Opts)(datadir: File) {
   }
 }
 
-parser.parse(args, Opts()) match {
-  case Some(opts) =>
-    if (opts.resetData) {
-      opts.mongoDataDir.delete()
-      opts.testData.foreach(submitImportData(opts))
-    }
-    opts.mongoDataDir.createDirectories()
-    val cmd = makeCommand(opts)
-    println(cmd.mkString(" "))
-    cmd.!
-  case None =>
+@main
+def main(args: String*): Unit = {
+  parser.parse(args, Opts()) match {
+    case Some(opts) =>
+      if (opts.resetData) {
+        opts.mongoDataDir.delete()
+        opts.testData.foreach(submitImportData(opts))
+      }
+      opts.mongoDataDir.createDirectories()
+      val cmd = makeCommand(opts)
+      println(cmd.mkString(" "))
+      cmd.!
+    case None =>
+  }
 }
