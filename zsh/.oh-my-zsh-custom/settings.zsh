@@ -24,6 +24,7 @@ restart() {
 }
 
 # alias
+alias l='exa -la --git'
 alias vim='emacsclient -nw'
 alias vi='emacsclient -nw'
 alias ec='emacsclient -c'
