@@ -4,7 +4,7 @@
 [core]
 	excludesfile = ~/.git.global.ignore
 	autocrlf = input
-	editor = emacs -nw
+	editor = emacsclient -nw
 
 [color]
 	ui = true

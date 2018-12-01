@@ -12,14 +12,37 @@ epm:install &silent-if-installed=$true   \
 
 use re
 use readline-binding
+use str
+use github.com/zzamboni/elvish-modules/nix
+use file
 
 edit:insert:binding[Alt-Backspace] = $edit:kill-small-word-left~
-edit:insert:binding[Alt-d] = $edit:kill-rune-right~
+
+# Strange is that there is no $edit:kill-small-word-right~ variable
+# set. So I simulate it….
+fn edit-kill-small-word-right {
+  $edit:move-dot-right-word~
+  $edit:kill-small-word-left~
+}
+
+edit:insert:binding[Alt-d] = $edit-kill-small-word-right~
+
+# Aliases
+
+fn playr [@dir]{
+  e:mpv (file:random-select &content-type='video/.*' $@dir)
+}
 
 use github.com/zzamboni/elvish-modules/alias
-alias:new l e:exa -lha --git
+alias:new l e:exa -la --git
 alias:new vim e:emacsclient -nw
+alias:new amm e:bash -c amm
+alias:new gpgc e:gpg-connect-agent updatestartuptty /bye
+alias:new e e:emacsclient --create-frame
+alias:new mc e:mc --colors="normal=white,black:header=white,red:menunormal=white,color90"
+alias:new mux e:tmuxinator
 
+# Completion
 
 edit:insert:binding[Tab] = { edit:completion:smart-start; edit:completion:trigger-filter }
 
@@ -33,7 +56,7 @@ smart-matcher:apply
 
 use github.com/zzamboni/elvish-completions/git
 
-# theme
+# Theme
 
 use github.com/zzamboni/elvish-themes/chain
 chain:bold-prompt = $true
@@ -48,7 +71,7 @@ chain:segment-style = [
 edit:prompt-stale-transform = { each [x]{ styled $x[text] "gray" } }
 
 
-#
+# Environment
 
 E:LESS = "-i -R"
 E:EDITOR = "emacsclient -nw"
