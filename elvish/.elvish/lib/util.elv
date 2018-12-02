@@ -15,7 +15,3 @@ fn y-or-n [&style=default prompt]{
   resp = (head -n1 < /dev/tty)
   eq $resp y
 }
-
-fn count-lines [@files]{
-  each [f]{ put [$f (cat $f | count)] } $files
-}

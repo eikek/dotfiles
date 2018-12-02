@@ -4,13 +4,11 @@ use str
 use re
 use list
 
-fn exists [@files]{
-  each [f]{
-    if ?(test -e $f) { put $true } else { put $false }
-  } $files
+fn exists [file]{
+  if ?(test -e $file) { put $true } else { put $false }
 }
 
-fn stat [@files]{
+fn stat [file]{
   fmt = '{"type": "%F",
           "group-id": %g, "group": "%G",
           "user-id": %u, "user": "%U",
@@ -19,31 +17,31 @@ fn stat [@files]{
           "last-mod": "%y", "last-mod-sec": %Y
          }'
 
-  each [f]{ e:stat -c $fmt $f | from-json } $files
+  e:stat -c $fmt $file | from-json
 }
 
-fn size [@files]{
-  stat $@files | each [i]{ put $i[size] }
+fn size [file]{
+  put (stat $file)[size]
 }
 
-fn file-type [@files]{
-  stat $@files | each [i]{ str:to-lower $i[type] }
+fn file-type [file]{
+  put (stat $file)[type]
 }
 
-fn is-directory [@files]{
-  file-type $@files | each [ft]{ eq $ft "directory" }
+fn is-directory [file]{
+  eq (file-type $file) "directory"
 }
 
-fn is-file [@files]{
-  file-type $@files | each [ft]{ eq $ft "regular file" }
+fn is-file [file]{
+  eq (file-type $file) "regular file"
 }
 
-fn is-symlink [@files]{
-  file-type $@files | each [ft]{ eq $ft "symbolic link" }
+fn is-symlink [file]{
+  eq (file-type $file) "symbolic link"
 }
 
-fn canonicalize [@files]{
-  each [f]{ e:readlink -nm $f | slurp } $files
+fn canonicalize [file]{
+  e:readlink -nm $file | slurp
 }
 
 fn ext [file]{
@@ -61,11 +59,11 @@ fn basename [file]{
   put $file[0:$n]
 }
 
-fn content-type [@files]{
-  each [f]{ put (file -pbL --mime-type $f) } $files
+fn content-type [file]{
+  put (file -pbL --mime-type $file)
 }
 
-fn random-select [&content-type=[] &tries=0 @dir]{
+fn random-select [&ct=[] &tries=0 @dir]{
   directory = [.]
   if (not-eq [] $dir) {
     directory = $dir
@@ -74,9 +72,9 @@ fn random-select [&content-type=[] &tries=0 @dir]{
   file = 0
   while (and (< $tries 200) (is $file 0)) {
     file = (list:random-select $@collection)
-    if (not-eq $content-type []) {
+    if (not-eq $ct []) {
       mime = (content-type $file)
-      if (re:match $content-type $mime) {
+      if (re:match $ct $mime) {
         put $file
       } else {
         tries = (+ 1 $tries)
@@ -89,4 +87,8 @@ fn random-select [&content-type=[] &tries=0 @dir]{
   if (is $file 0) {
     fail "Nothing found."
   }
+}
+
+fn lines [file]{
+  cat $file | count
 }

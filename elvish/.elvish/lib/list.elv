@@ -1,3 +1,11 @@
+fn is-list [v]{
+  put (==s (kind-of $v) "list")
+}
+
+fn is-map [v]{
+  put (==s (kind-of $v) "map")
+}
+
 fn findcmp [f a @rest]{
   for n $rest {
     if ($f $n $a) {
@@ -7,11 +15,20 @@ fn findcmp [f a @rest]{
   put $a
 }
 
-fn min [@list &by=[x]{ put $x }]{
+# Example:
+#   put **.org | peach (list:with $file:lines~) | list:min &by-i=1 (all)
+#
+fn min [@list &by=[x]{ put $x } &by-i=-1]{
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
   findcmp [a b]{ < ($by $a) ($by $b) } $@list
 }
 
-fn max [@list &by=[x]{ put $x }]{
+fn max [@list &by=[x]{ put $x } &by-i=-1]{
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
   findcmp [a b]{ > ($by $a) ($by $b) } $@list
 }
 
@@ -25,41 +42,48 @@ fn random-select [&n=1 &from=0 &to=-1 @list]{
   }
 }
 
-fn zip [l1 @l2]{
+fn -zip [l1 @l2]{
   c = (min (count $l1) (count $l2))
   range $c | peach [i]{
     put [$l1[$i] $l2[$i]]
   }
 }
 
-fn filter [f @list]{
-  each [e]{ if ($f $e) { put $e } } $list
+# Example:
+#    put **.org | each (list:filter [x]{ < (count $x) 18 })
+#
+fn filter [f]{
+  put [e]{
+    if ($f $e) { put $e }
+  }
 }
 
-fn filterNot [f @list]{
-  each [e]{ if (not ($f $e)) { put $e } } $list
-}
-
-fn get-n [n @list]{
-  each [e]{ put $e[$n] } $list
-}
-
-fn first [@list]{
-  get-n 0 $@list
-}
-
-fn second [@list]{
-  get-n 1 $@list
-}
-
-fn third [@list]{
-  get-n 2 $@list
+fn filterNot [f]{
+  put [e]{
+    if (not ($f $e)) { put $e }
+  }
 }
 
 # Example:
-#   list:sort [a 1] [b 5] [c 3] [d 2] [e 4] &by=$list:second~
+#  put **.org | each $file:stat~ | take 5 | each (list:get name)
+fn get [n]{
+  put [list]{
+    put $list[$n]
+  }
+}
+
+1 = (get 0)
+2 = (get 1)
+3 = (get 2)
+4 = (get 3)
+
+# Example:
+#   put **.elv | peach (list:with $file:lines~) | list:sort &by-i=1 (all)
 #
-fn sort [@things &by=[x]{ put $x }]{
+fn sort [@things &by=[x]{ put $x } &by-i=-1]{
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
   if (not-eq $things []) {
     h @tail = $@things
     hv = ($by $h)
@@ -70,15 +94,71 @@ fn sort [@things &by=[x]{ put $x }]{
   }
 }
 
-fn sum [@things &by=[x]{ put $x }]{
+fn sum [@things &by=[x]{ put $x } &by-i=-1]{
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
+
   res = 0
   each [e]{ res = (+ $res ($by $e)) } $things
   put $res
+}
+
+fn avg [@things &by=[x]{ put $x} &by-i=-1]{
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
+  s = (sum &by=$by $@things)
+  put (/ $s (count $things))
+}
+
+fn median [@things &by=[x]{ put $x } &by-i=-1]{
+  use str
+
+  if (not-eq $by-i -1) {
+    by = [x]{ put $x[$by-i] }
+  }
+  @sorted = (sort &by=$by $@things)
+  len = (count $things)
+  mid = (/ $len 2)
+  if (str:contains $mid .) {
+    mid = (+ $mid 0.5)
+  }
+  put $sorted[$mid]
 }
 
 fn reverse [@things]{
   len = (count $things)
   range $len | each [i]{
     put $things[(- $len $i 1)]
+  }
+}
+
+# Example:
+#   put **.org | take 10 | each (list:with $file:lines~)
+#
+fn with [f]{
+  put [e]{
+    v = ($f $e)
+    if (and (is-list $v) (is-list $e)) {
+      put [$@e $@v]
+    } elif (is-list $v) {
+      put [$e $@v]
+    } elif (is-list $e) {
+      put [$@e $v]
+    } else {
+      put [$e ($f $e)]
+    }
+  }
+}
+
+fn withm [f &k=key &v=value]{
+  put [e]{
+    val = ($f $e)
+    if (is-map $val) {
+      assoc $val $k $e
+    } else {
+      assoc (assoc [&] $k $e) $v $val
+    }
   }
 }

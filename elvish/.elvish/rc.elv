@@ -15,6 +15,7 @@ use readline-binding
 use str
 use github.com/zzamboni/elvish-modules/nix
 use file
+use list
 
 edit:insert:binding[Alt-Backspace] = $edit:kill-small-word-left~
 
@@ -30,7 +31,7 @@ edit:insert:binding[Alt-d] = $edit-kill-small-word-right~
 # Aliases
 
 fn playr [@dir]{
-  e:mpv (file:random-select &content-type='video/.*' $@dir)
+  e:mpv (file:random-select &ct='video/.*' $@dir)
 }
 
 use github.com/zzamboni/elvish-modules/alias
