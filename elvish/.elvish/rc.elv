@@ -38,7 +38,7 @@ alias:new l e:exa -la --git
 alias:new vim e:emacsclient -nw
 alias:new amm e:bash -c amm
 alias:new gpgc e:gpg-connect-agent updatestartuptty /bye
-alias:new e e:emacsclient --create-frame
+alias:new ec e:emacsclient --create-frame
 alias:new mc e:mc --colors="normal=white,black:header=white,red:menunormal=white,color90"
 alias:new mux e:tmuxinator
 
