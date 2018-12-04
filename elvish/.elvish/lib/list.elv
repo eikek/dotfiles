@@ -6,6 +6,31 @@ fn is-map [v]{
   put (==s (kind-of $v) "map")
 }
 
+
+# Example:
+#  put **.org | each $file:stat~ | take 5 | each (list:get name)
+fn get [n &mapchar=.]{
+  use str
+  put [list-or-map]{
+    if (str:contains $n $mapchar) {
+      @parts = (splits $mapchar $n)
+      cur = $list-or-map
+      while (> (count $parts) 0) {
+        head @parts = $@parts
+        cur = $cur[$head]
+      }
+      put $cur
+    } else {
+      put $list-or-map[$n]
+    }
+  }
+}
+
+1 = (get 0)
+2 = (get 1)
+3 = (get 2)
+4 = (get 3)
+
 fn findcmp [f a @rest]{
   for n $rest {
     if ($f $n $a) {
@@ -20,14 +45,14 @@ fn findcmp [f a @rest]{
 #
 fn min [@list &by=[x]{ put $x } &by-i=-1]{
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
   findcmp [a b]{ < ($by $a) ($by $b) } $@list
 }
 
 fn max [@list &by=[x]{ put $x } &by-i=-1]{
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
   findcmp [a b]{ > ($by $a) ($by $b) } $@list
 }
@@ -64,39 +89,34 @@ fn filterNot [f]{
   }
 }
 
-# Example:
-#  put **.org | each $file:stat~ | take 5 | each (list:get name)
-fn get [n]{
-  put [list]{
-    put $list[$n]
+fn -cmp [a b]{
+  try {
+    if (< $a $b) { put -1 } elif (> $a $b) { put 1 } else { put 0 }
+  } except _ {
+    if (<s $a $b) { put -1 } elif (>s $a $b) { put 1 } else { put 0 }
   }
 }
-
-1 = (get 0)
-2 = (get 1)
-3 = (get 2)
-4 = (get 3)
 
 # Example:
 #   put **.elv | peach (list:with $file:lines~) | list:sort &by-i=1 (all)
 #
 fn sort [@things &by=[x]{ put $x } &by-i=-1]{
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
   if (not-eq $things []) {
     h @tail = $@things
     hv = ($by $h)
-    sort &by=$by (each [e]{ if (< ($by $e) $hv) { put $e } } $tail)
-    each [e]{ if (== ($by $e) $hv) { put $e } } $tail
+    sort &by=$by (each [e]{ if (< (-cmp ($by $e) $hv) 0) { put $e } } $tail)
+    each [e]{ if (== (-cmp ($by $e) $hv) 0) { put $e } } $tail
     put $h
-    sort &by=$by (each [e]{ if (> ($by $e) $hv) { put $e } } $tail)
+    sort &by=$by (each [e]{ if (> (-cmp ($by $e) $hv) 0) { put $e } } $tail)
   }
 }
 
 fn sum [@things &by=[x]{ put $x } &by-i=-1]{
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
 
   res = 0
@@ -106,7 +126,7 @@ fn sum [@things &by=[x]{ put $x } &by-i=-1]{
 
 fn avg [@things &by=[x]{ put $x} &by-i=-1]{
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
   s = (sum &by=$by $@things)
   put (/ $s (count $things))
@@ -116,7 +136,7 @@ fn median [@things &by=[x]{ put $x } &by-i=-1]{
   use str
 
   if (not-eq $by-i -1) {
-    by = [x]{ put $x[$by-i] }
+    by = [x]{ put ((get $by-i) $x) }
   }
   @sorted = (sort &by=$by $@things)
   len = (count $things)
