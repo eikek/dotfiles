@@ -1,0 +1,65 @@
+#!/usr/bin/env amm
+
+import $ivy.`org.apache.poi:poi:4.0.1`
+import $ivy.`org.apache.poi:poi-ooxml:4.0.1`
+
+import ammonite.ops._
+import scala.collection.JavaConverters._
+import java.nio.file.{Path => JPath, _}
+import org.apache.poi.ss.usermodel._
+import org.apache.poi.xssf.usermodel._
+
+/*
+ * XSL to CSV converter utility based on apache poi
+ * http://poi.apache.org/
+ */
+
+@main
+def main(xls: Path, sheet: Int = 0, sep: String = ",", strEncl: String = "\""): Unit = {
+  if (stat(xls).isDir) {
+    Console.err.println("Input must be a file, not a directory")
+    System.exit(1)
+  }
+  if (strEncl.length != 1) {
+    Console.err.println(s"String enclosing is not one character: $strEncl")
+    System.exit(1)
+  }
+
+  val in = read.inputStream(xls)
+  val workbook = new XSSFWorkbook(in)
+  val sheetn = workbook.getSheetAt(sheet)
+  try {
+    printLines(sheetn, sep, strEncl)
+  } finally {
+    workbook.close
+    in.close
+  }
+}
+
+def printLines(sheet: XSSFSheet, sep: String, strEncl: String): Unit =
+  for (row <- sheet.iterator.asScala) {
+    println(row.cellIterator.asScala.
+      map({ cell =>
+        cell.getCellType match {
+          case CellType.STRING =>
+            makeCsvString(cell.getStringCellValue, sep, strEncl)
+
+          case CellType.NUMERIC =>
+            cell.getNumericCellValue
+
+          case CellType.BLANK =>
+            ""
+          case CellType.BOOLEAN =>
+            cell.getBooleanCellValue
+
+          case ct =>
+            Console.err.println(s"Unknown cell type: $ct")
+        }
+      }).
+      mkString(sep))
+  }
+
+
+def makeCsvString(s: String, sep: String, strEncl: String): String =
+  if (!s.contains(sep) && !s.contains(strEncl) && !s.contains("\n")) s
+  else strEncl + s.replace(strEncl, "\\" + strEncl) + strEncl
