@@ -8,14 +8,16 @@ epm:install &silent-if-installed=$true   \
   github.com/zzamboni/elvish-themes      \
   github.com/xiaq/edit.elv               \
   github.com/muesli/elvish-libs          \
-  github.com/iwoloschin/elvish-packages
+  github.com/iwoloschin/elvish-packages \
+  github.com/eikek/elv-modules
 
 use re
 use readline-binding
 use str
 use github.com/zzamboni/elvish-modules/nix
-use file
-use list
+use github.com/eikek/elv-modules/file
+use github.com/eikek/elv-modules/list
+use github.com/eikek/elv-modules/csv
 
 edit:insert:binding[Alt-Backspace] = $edit:kill-small-word-left~
 
