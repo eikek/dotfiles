@@ -6,7 +6,9 @@ import $ivy.`org.apache.poi:poi-ooxml:4.0.1`
 import ammonite.ops._
 import scala.collection.JavaConverters._
 import java.nio.file.{Path => JPath, _}
+import java.time._
 import org.apache.poi.ss.usermodel._
+import org.apache.poi.ss.format._
 import org.apache.poi.xssf.usermodel._
 
 /*
@@ -45,12 +47,15 @@ def printLines(sheet: XSSFSheet, sep: String, strEncl: String): Unit =
             makeCsvString(cell.getStringCellValue, sep, strEncl)
 
           case CellType.NUMERIC =>
-            cell.getNumericCellValue
+            makeCsvString(getNumericValue(cell), sep, strEncl)
 
           case CellType.BLANK =>
             ""
           case CellType.BOOLEAN =>
             cell.getBooleanCellValue
+
+          case CellType.FORMULA =>
+            makeCsvString(cell.getCellFormula, sep, strEncl)
 
           case ct =>
             Console.err.println(s"Unknown cell type: $ct")
@@ -59,6 +64,45 @@ def printLines(sheet: XSSFSheet, sep: String, strEncl: String): Unit =
       mkString(sep))
   }
 
+def getNumericValue(cell: Cell): String = {
+  val fmt = Option(cell.getCellStyle).map(_.getDataFormatString).filter(_.trim.nonEmpty)
+  fmt match {
+    case None =>
+      cell.getNumericCellValue + ""
+
+    case Some(pattern) =>
+      if (looksLikeDateTimePattern(pattern)) {
+        // looks like date pattern?
+        Instant.ofEpochMilli(cell.getDateCellValue.getTime).toString
+      } else if (looksLikeDatePattern(pattern)) {
+        val dt = Instant.ofEpochMilli(cell.getDateCellValue.getTime)
+        LocalDate.from(dt.atOffset(ZoneOffset.UTC)).toString
+      } else if (looksLikeTimePattern(pattern)) {
+        val dt = Instant.ofEpochMilli(cell.getDateCellValue.getTime)
+        LocalTime.from(dt.atOffset(ZoneOffset.UTC)).toString
+      } else {
+        // use number formatter
+        val formatter = new CellNumberFormatter(pattern)
+        val sb = new StringBuffer()
+        formatter.formatValue(sb, cell.getNumericCellValue)
+        sb.toString
+      }
+  }
+}
+
+def looksLikeDateTimePattern(s: String): Boolean = {
+  looksLikeDatePattern(s) && looksLikeTimePattern(s)
+}
+
+def looksLikeDatePattern(s: String): Boolean = {
+  val str = s.toLowerCase
+  str.contains("y") || s.contains("m") || str.contains("d")
+}
+
+def looksLikeTimePattern(s: String): Boolean = {
+  val str = s.toLowerCase
+  str.contains("h") || s.contains("M") || str.contains("s")
+}
 
 def makeCsvString(s: String, sep: String, strEncl: String): String =
   if (!s.contains(sep) && !s.contains(strEncl) && !s.contains("\n")) s
