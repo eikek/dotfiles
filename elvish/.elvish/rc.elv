@@ -18,6 +18,7 @@ use github.com/eikek/elv-modules/file
 use github.com/eikek/elv-modules/list
 use github.com/eikek/elv-modules/csv
 use github.com/eikek/elv-modules/nix
+use github.com/eikek/elv-modules/completer
 
 edit:insert:binding[Alt-Backspace] = $edit:kill-small-word-left~
 
