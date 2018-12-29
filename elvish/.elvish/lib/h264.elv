@@ -74,7 +74,11 @@ fn props [f]{
   put $videos $audios $subtitles
 }
 
-fn encode [f &crf=22 &vidopts=["-tune" "film"] &dry=$false]{
+fn -make-target [f]{
+  put (-basename $f).transcoded.mkv
+}
+
+fn encode [f &crf=23 &vidopts=["-tune" "film"] &dry=$false]{
   vids audio subs = (props $f)
   cmd = [-i $f]
 
@@ -102,7 +106,7 @@ fn encode [f &crf=22 &vidopts=["-tune" "film"] &dry=$false]{
     stream = $subs[eng]
     cmd = [$@cmd -map 0:(-stream-index $stream)]
   }
-  cmd = [$@cmd "-c:s" copy (-basename $f).transcoded.mkv]
+  cmd = [$@cmd "-c:s" copy (-make-target $f)]
 
   print "Running: ffmpeg "
   echo $cmd
@@ -111,12 +115,22 @@ fn encode [f &crf=22 &vidopts=["-tune" "film"] &dry=$false]{
   }
 }
 
-fn to-encoded [&crf=22 &vidopts=["-tune" "film"] &dry=$false &overwrite=$false]{
+fn to-encoded [&crf=23 &vidopts=["-tune" "film"] &dry=$false &overwrite=$false]{
   put [file]{
-    if (and (not $overwrite) (str:contains $file transcoded)) {
+    if (str:contains $file transcoded) {
       echo "File "$file" already transcoded"
     } else {
-      encode $file &crf=$crf &vidopts=$vidopts &dry=$dry
+      target = (-make-target $file)
+      if ?(test -e $target) {
+        if $overwrite {
+          rm -f $target
+          encode $file &crf=$crf &vidopts=$vidopts &dry=$dry
+        } else {
+          echo "Not overwriting target file: "$target
+        }
+      } else {
+        encode $file &crf=$crf &vidopts=$vidopts &dry=$dry
+      }
     }
   }
 }
