@@ -93,7 +93,7 @@ def makeOutFile(in: MediaInfo, inPath: Path, out: Path, ogg: Boolean): Path = {
   if (out.ext.nonEmpty) out
   else {
     val rel = in.file.relativeTo(inPath) match {
-      case p if p == RelPath.empty => p
+      case p if p.segments.isEmpty => p
       case p => p/up
     }
     if (in.format.lossy) {
