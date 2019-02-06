@@ -19,6 +19,7 @@ use github.com/eikek/elv-modules/list
 use github.com/eikek/elv-modules/csv
 use github.com/eikek/elv-modules/nix
 use github.com/eikek/elv-modules/completer
+use github.com/eikek/elv-modules/pdf2txt
 
 edit:insert:binding[Alt-Backspace] = $edit:kill-small-word-left~
 
