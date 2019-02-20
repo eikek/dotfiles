@@ -50,8 +50,8 @@
 (defcommand ror-htop ()()
   (run-or-raise "alacritty --title htop --command htop" '(:title "htop")))
 
-(defcommand ror-conkeror ()()
-  (run-or-raise "conkeror" '(:class "Conkeror")))
+(defcommand ror-browser ()()
+  (run-or-raise "qutebrowser" '(:class "qutebrowser")))
 
 (defcommand ror-chromium ()()
   (run-or-raise "chromium" '(:class "Chromium")))
@@ -106,7 +106,7 @@ DISPLAY defines the display to use, default is ':1.0'."
 (define-key *root-map* (kbd "C-e") "emacs")
 (define-key *root-map* (kbd "RET") "ror-terminal")
 (define-key *root-map* (kbd "C-RET") "ror-terminal")
-(define-key *root-map* (kbd "C-b") "ror-conkeror")
+(define-key *root-map* (kbd "C-b") "ror-browser")
 (define-key *root-map* (kbd "C-f") "ror-firefox")
 (define-key *root-map* (kbd "C-c") "ror-chromium")
 (if (string= "bluecare-n46" hostname)
