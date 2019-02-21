@@ -359,7 +359,7 @@ user. The focus is left on the current frame."
 (define-key *mpc-keymap* (kbd "l") "mpc-playlist")
 
 (define-key *top-map* (kbd "XF86AudioPlay") "mpc-toggle")
-(define-key *top-map* (kbd "F12") "mpc-mode")
+;(define-key *top-map* (kbd "F12") "mpc-mode")
 
 ;;;;;; emms integration
 

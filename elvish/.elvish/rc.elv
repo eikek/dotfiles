@@ -41,6 +41,7 @@ fn playr [@dir]{
 use github.com/zzamboni/elvish-modules/alias
 alias:new l e:exa -la --git
 alias:new cat e:bat --theme DarkNeon
+alias:new cp e:rsync -avP
 alias:new vim e:emacsclient -nw
 alias:new amm e:bash -c amm
 alias:new gpgc e:gpg-connect-agent updatestartuptty /bye
