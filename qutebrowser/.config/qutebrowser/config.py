@@ -5,7 +5,7 @@
 import socket
 
 c.backend = 'webengine'
-c.tabs.show = 'switching'
+c.tabs.show = 'never' # was: switching
 c.content.autoplay = False
 
 c.content.cookies.accept = 'no-3rdparty'
@@ -25,8 +25,8 @@ c.editor.encoding = 'utf-8'
 
 c.hints.chars = 'uiaeosnrtd'
 
-c.input.insert_mode.auto_enter = True
-c.input.insert_mode.auto_leave = True
+c.input.insert_mode.auto_enter = False
+c.input.insert_mode.auto_leave = False
 
 #   - tab: Open a new tab in the existing window and activate the window.
 #   - tab-bg: Open a new background tab in the existing window and activate the window.
@@ -65,8 +65,8 @@ c.bindings.commands['normal'] = {
         '<alt-r>': 'reload',
 
         # Zoom
-        '+': 'zoom-in',
-        '-': 'zoom-out',
+        '<ctrl++>': 'zoom-in',
+        '<ctrl+->': 'zoom-out',
 
         # Commands
         '<alt-x>': 'set-cmd-text :',
@@ -108,8 +108,8 @@ c.bindings.commands['normal'] = {
         # editing
         '<ctrl-f>': 'fake-key <Right>',
         '<ctrl-b>': 'fake-key <Left>',
-        '<ctrl-a>': 'fake-key <Home>',
-        '<ctrl-e>': 'fake-key <End>',
+        '<': 'fake-key <Home>',
+        '>': 'fake-key <End>',
         '<ctrl-n>': 'fake-key <Down>',
         '<ctrl-p>': 'fake-key <Up>',
         '<alt-f>': 'fake-key <Ctrl-Right>',
@@ -119,6 +119,7 @@ c.bindings.commands['normal'] = {
         '<alt-backspace>': 'fake-key <Ctrl-Backspace>',
         '<ctrl-w>': 'fake-key <Ctrl-backspace>',
         '<ctrl-y>': 'insert-text {primary}',
+        '<ctrl-e>': 'enter-mode insert',
 
         # Numbers
         # https://github.com/qutebrowser/qutebrowser/issues/4213
