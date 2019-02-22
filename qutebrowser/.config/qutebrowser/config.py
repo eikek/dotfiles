@@ -23,7 +23,9 @@ c.content.user_stylesheets = []
 c.editor.command = ['emacsclient', '-c', '{file}']
 c.editor.encoding = 'utf-8'
 
+c.hints.find_implementation = "python"
 c.hints.chars = 'uiaeosnrtd'
+c.fonts.hints = "bold 12pt monospace"
 
 c.input.insert_mode.auto_enter = False
 c.input.insert_mode.auto_leave = False
@@ -46,7 +48,12 @@ c.url.searchengines = {
 
 c.window.hide_decoration = True
 
-c.bindings.key_mappings = {'<Ctrl-G>': '<Escape>', '<Ctrl-M>': '<Return>', '<Enter>': '<Return>', '<Ctrl-Enter>': '<Ctrl-Return>'}
+c.bindings.key_mappings = {
+    '<Ctrl-G>': '<Escape>',
+    '<Ctrl-M>': '<Return>',
+    '<Enter>': '<Return>',
+    '<Ctrl-Enter>': '<Ctrl-Return>'
+}
 
 # emacs like key bindings
 # starting help here: https://gitlab.com/jgkamat/qutemacs/blob/master/qutemacs.py
@@ -69,7 +76,7 @@ c.bindings.commands['normal'] = {
     '<alt-shift-v>': 'scroll-page 0 -1',
     '<alt-n>': 'tab-next',
     '<alt-p>': 'tab-prev',
-    '<alt-r>': 'reload',
+    'r': 'reload',
 
     # Zoom
     '<ctrl++>': 'zoom-in',
@@ -87,12 +94,14 @@ c.bindings.commands['normal'] = {
     'g': 'set-cmd-text -s :open -r ',
     'yy': 'yank',
     'yh': 'hint links yank',
-    ',s': 'set-cmd-text -s :open -r',
-    ',S': 'set-cmd-text -s :open -t',
-    ',g': 'set-cmd-text -s :open -r github',
-    ',G': 'set-cmd-text -s :open -t github',
-    ',m': 'set-cmd-text -s :open -r maven',
-    ',M': 'set-cmd-text -s :open -t maven',
+    '<Space>s': 'set-cmd-text -s :open -r',
+    '<Space>S': 'set-cmd-text -s :open -t',
+    '<Space>g': 'set-cmd-text -s :open -r github',
+    '<Space>G': 'set-cmd-text -s :open -t github',
+    '<Space>m': 'set-cmd-text -s :open -r maven',
+    '<Space>M': 'set-cmd-text -s :open -t maven',
+    '<F3>': 'record-macro',
+    '<F4>': 'run-macro',
     
     # searching
     '<ctrl-s>': 'set-cmd-text /',
@@ -132,9 +141,9 @@ c.bindings.commands['normal'] = {
     '<ctrl-d>': 'fake-key <Delete>',
     '<alt-d>': 'fake-key <Ctrl-Delete>',
     '<alt-backspace>': 'fake-key <Ctrl-Backspace>',
-    '<ctrl-w>': 'fake-key <Ctrl-backspace>',
     '<ctrl-y>': 'insert-text {clipboard}',
-    '<ctrl-e>': 'enter-mode insert',
+    '<alt-w>': 'fake-key <ctrl-c>',
+    'i': 'enter-mode insert',
 
     # Numbers
     # https://github.com/qutebrowser/qutebrowser/issues/4213
@@ -181,6 +190,14 @@ c.bindings.commands['caret'] = {
 
 c.bindings.commands['insert'] = {
     '<ctrl-y>': 'insert-text {clipboard}',
+    '<alt-f>': 'fake-key <Ctrl-Right>',
+    '<alt-b>': 'fake-key <Ctrl-Left>',
+    '<ctrl-f>': 'fake-key <Right>',
+    '<ctrl-b>': 'fake-key <Left>',
+    '<ctrl-n>': 'fake-key <Down>',
+    '<ctrl-p>': 'fake-key <Up>',
+    '<alt-d>': 'fake-key <Ctrl-Delete>',
+    '<alt-backspace>': 'fake-key <Ctrl-Backspace>',
 }
 
 if socket.gethostname() == "kythira":
