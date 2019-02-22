@@ -39,6 +39,7 @@ c.url.default_page = 'https://start.duckduckgo.com/'
 c.url.searchengines = {
     "DEFAULT": "https://duckduckgo.com/?q={}",
     "github": "https://github.com/search?q={}",
+    "maven": "https://search.maven.org/search?q={}",
     "scala": "https://www.scala-lang.org/api/2.12.8/?search={}",
     "dict": "https://www.dict.cc/?s={}"
 }
@@ -86,6 +87,12 @@ c.bindings.commands['normal'] = {
     'g': 'set-cmd-text -s :open -r ',
     'yy': 'yank',
     'yh': 'hint links yank',
+    ',s': 'set-cmd-text -s :open -r',
+    ',S': 'set-cmd-text -s :open -t',
+    ',g': 'set-cmd-text -s :open -r github',
+    ',G': 'set-cmd-text -s :open -t github',
+    ',m': 'set-cmd-text -s :open -r maven',
+    ',M': 'set-cmd-text -s :open -t maven',
     
     # searching
     '<ctrl-s>': 'set-cmd-text /',

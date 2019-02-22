@@ -49,6 +49,7 @@ alias:new ec e:emacsclient --create-frame
 alias:new mc e:mc --colors="normal=white,black:header=white,red:menunormal=white,color90"
 alias:new mux e:tmuxinator
 alias:new pill-nas E:PILL_OPTS=-Dpill.cli.endpoint=http://nas:10549 pill
+alias:new weather curl wttr.in
 
 # Completion
 
