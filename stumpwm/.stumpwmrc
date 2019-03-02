@@ -282,6 +282,14 @@ user. The focus is left on the current frame."
       (dolist (k keylist)
         (send-fake-key win (kbd k))))))
 
+(defun keys-to-terminal (keys)
+  (let ((win (car (find-matching-windows '(:class "Alacritty") t t)))
+        (keylist (if (listp keys) keys (list keys))))
+    (when win
+      (dolist (k keylist)
+        (send-fake-key win (kbd k))))))
+
+
 (defcommand clock-out ()()
   (keys-to-emacs '("C-c" "C-x" "C-o")))
 
@@ -302,6 +310,14 @@ user. The focus is left on the current frame."
 (define-key *clock-keymap* (kbd "C-q") "clock-quit")
 (define-key *root-map* (kbd "C-x") '*clock-keymap*)
 
+;; (defcommand emacs-to-shell () ()
+;;   "Copy current selection in emacs, switch to terminal and paste."
+;;   (progn
+;;     (keys-to-emacs '("M-w"))
+;;     (keys-to-terminal '("C-a" "C-y"))
+;;     (ror-terminal)))
+
+;; (define-key *root-map* (kbd "C-y") "emacs-to-shell")
 
 ;;;;;;; mpc stuff
 (defun mpc-playing-p ()
