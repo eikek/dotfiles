@@ -26,9 +26,8 @@ GRTAGS
 GTAGS
 TAGS
 
-# nice2 stuff
+# patches
 /*.patch
-/*.zip
 
 # ensime
 .ensime_cache/
@@ -37,3 +36,6 @@ TAGS
 # Emacs/Cask
 *.elc
 .cask/
+
+# unversioned things
+unversioned/
