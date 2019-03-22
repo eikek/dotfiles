@@ -19,6 +19,7 @@ c.content.headers.referer = 'same-domain'
 c.content.notifications = False
 c.content.pdfjs = False
 c.content.user_stylesheets = []
+c.content.ssl_strict = False
 
 c.editor.command = ['emacsclient', '-c', '{file}']
 c.editor.encoding = 'utf-8'
