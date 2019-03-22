@@ -40,7 +40,8 @@ def main(in: Path @doc("A single music file or a path")
   , parallel: Boolean @doc("Whether to convert using all cores") = false
   , rest: FileAction @doc("What to do with files that are already fine or lossy encoded.") = FileAction.Skip
   , ogg: Boolean @doc("Convert all to ogg (16/44). Default is to flac, resampling to 16/44 if necessary.") = false
-  , oggQuality: Int @doc("If `ogg` is used, this is the quality for encoding") = 8): Unit = {
+  , mp3: Boolean @doc("Convert all to mp3 (16/44).") = false
+  , quality: Int @doc("If `ogg` or `mp3` is used, this is the quality for encoding. For mp3, a number 0-9 yields in VBR (0 = highest), bigger numbers are CBR in kbits/s.") = 8): Unit = {
   implicit val wd = pwd
 
   if (!exists(in)) {
@@ -48,7 +49,7 @@ def main(in: Path @doc("A single music file or a path")
   }
 
   val task: Stream[IO, Either[Throwable, (MediaInfo, Path)]] =
-    createMainTask[IO](in, out, rest, ogg, oggQuality)
+    createMainTask[IO](in, out, rest, ogg, mp3, quality)
 
   task.
     to(printSink).
@@ -59,12 +60,14 @@ def createMainTask[F[_]: Sync](in: Path
   , out: Path
   , rest: FileAction
   , ogg: Boolean
+  , mp3: Boolean
   , quality: Int)(implicit wd: Path): Stream[F, Either[Throwable, (MediaInfo, Path)]] = {
 
   def convert(mi: MediaInfo): F[(MediaInfo, Path)] = {
-    val outFile = makeOutFile(mi, in, out, ogg)
+    val outFile = makeOutFile(mi, in, out, ogg, mp3)
     val conv =
       if (ogg) mi.toOgg(outFile, quality, rest)
+      else if (mp3) mi.toMp3(outFile, quality, rest)
       else mi.toFlac(outFile, rest)
     for {
       _  <- checkOutFile(outFile)
@@ -88,7 +91,7 @@ def createMainTask[F[_]: Sync](in: Path
 def inputFilter(in: Path): Boolean =
   stat(in).isFile && MediaInfo.Format.all.contains(in.ext.toLowerCase)
 
-def makeOutFile(in: MediaInfo, inPath: Path, out: Path, ogg: Boolean): Path = {
+def makeOutFile(in: MediaInfo, inPath: Path, out: Path, ogg: Boolean, mp3: Boolean): Path = {
   // assume concrete file if ext is nonEmpty
   if (out.ext.nonEmpty) out
   else {
@@ -101,6 +104,7 @@ def makeOutFile(in: MediaInfo, inPath: Path, out: Path, ogg: Boolean): Path = {
     } else {
       val basename = in.file.last.substring(0, in.file.last.length - in.file.ext.length - 1)
       if (ogg) out/rel/(basename +".ogg")
+      else if (mp3) out/rel/(basename + ".mp3")
       else out/rel/(basename + ".flac")
     }
   }
@@ -196,6 +200,37 @@ case class MediaInfo(
             , "-codec:a", "libvorbis"
             , "-f", "ogg"
             , "-q:a", quality
+            , out)
+        }
+    }
+  }
+
+  def toMp3[F[_]: Sync](out: Path, quality: Int, rest: FileAction)(implicit wd: Path): F[Unit] = {
+    val q =
+      if (quality > 9) Seq("-b:a", quality +"k")
+      else Seq("-q:a", quality+"")
+
+    if (format.lossy) fileActionImpl(file, out, rest)
+    else audioFilter match {
+      case Some(af) =>
+        Sync[F].delay {
+          mkdir.!(out/up)
+          %("ffmpeg", "-i", file
+            , "-vn", "-sn"
+            , "-af", s"aformat=$af"
+            , "-map_metadata:s:a", "0:s:0"
+            , "-codec:a", "libmp3lame"
+            , q
+            , out)
+        }
+      case None =>
+        Sync[F].delay {
+          mkdir.!(out/up)
+          %("ffmpeg", "-i", file
+            , "-vn", "-sn"
+            , "-map_metadata:s:a", "0:s:0"
+            , "-codec:a", "libmp3lame"
+            , q
             , out)
         }
     }
