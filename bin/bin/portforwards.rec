@@ -12,24 +12,10 @@
 %type: Sudo bool
 %type: TargetHost line
 
-Name: mail-eknet
-Host: eknet.org
-Port: 587
-Port: 143
-Offset: 2000
-Sudo: no
-
 Name: mail-posteo
 Host: eknet.org
 TargetHost: posteo.de
 Port: 993
 Port: 587
 Offset: 3000
-Sudo: no
-
-Name: jabber
-Host: eknet.org
-Port: 5222
-Port: 5223
-Offset: 0
 Sudo: no
