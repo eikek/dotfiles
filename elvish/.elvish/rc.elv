@@ -48,7 +48,7 @@ fn cheat [@opts]{
 
 use github.com/zzamboni/elvish-modules/alias
 alias:new l e:exa -la --git
-alias:new cat e:bat --theme DarkNeon --color always --decorations always --style changes,numbers,grid
+alias:new cat e:bat --theme DarkNeon --color auto --decorations auto --style changes,numbers,grid
 alias:new cp e:rsync -avP
 alias:new vim e:emacsclient -nw
 alias:new amm e:bash -c amm
