@@ -29,7 +29,11 @@ fn -stream-type [stream]{
 
 fn -stream-index [stream]{
   l = $stream[1]
-  put $l[:-5]
+  if (> (count $l) 5) {
+    put $l[:-5]
+  } else {
+    put $l
+  }
 }
 
 fn -stream-lang [stream]{
@@ -46,10 +50,10 @@ fn props [f]{
 
   each [stream]{
     st = (-stream-type $stream)
-    lng = (-stream-lang $stream)
     if (eq $st "Video") {
       videos = [$stream $@videos]
     } elif (eq $st "Audio") {
+      lng = (-stream-lang $stream)
       if (or (eq $lng "deu") (eq $lng "ger")) {
         if (has-key $audios deu) {
           cas = $audios[deu]
@@ -63,6 +67,7 @@ fn props [f]{
         audios = (assoc $audios eng $stream)
       }
     } elif (eq $st "Subtitle") {
+      lng = (-stream-lang $stream)
       if (and (not (has-key $subtitles "deu")) (or (eq $lng "deu") (eq $lng "ger"))) {
         subtitles = (assoc $subtitles deu $stream)
       } elif (and (not (has-key $subtitles "eng")) (eq $lng eng)) {
