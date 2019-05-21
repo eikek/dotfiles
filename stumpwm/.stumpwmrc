@@ -419,7 +419,7 @@ user. The focus is left on the current frame."
 (setq *common-passwords*
   '(("bluecare" . "bluecare/login")
     ("aspectra" . "bluecare/aspectra-js")
-    ("http://eknet.org" . "eknet.org/www")
+    ("posteo" . "email/posteo")
     ("github" . "devel/github")
     ("magnatune" . "internet/magnatune")
     ("google" . "internet/google")))
