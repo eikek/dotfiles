@@ -91,7 +91,7 @@ fn encode [f &crf=23 &vidopts=["-tune" "film"] &dry=$false]{
     cmd = [$@cmd -map 0:(-stream-index $vs)]
   } $vids
 
-  cmd = [$@cmd "-c:v" libx264 "-crf" $crf $@vidopts]
+  cmd = [$@cmd "-c:v" libx264 "-max_muxing_queue_size" "9999" "-crf" $crf $@vidopts]
 
   if (has-key $audio deu) {
     stream = $audio[deu]
