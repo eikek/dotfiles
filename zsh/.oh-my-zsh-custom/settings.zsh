@@ -25,6 +25,7 @@ restart() {
 
 # alias
 alias l='exa -la --git'
+alias cat="bat"
 alias vim='emacsclient -nw'
 alias vi='emacsclient -nw'
 alias ec='emacsclient -c'
@@ -36,6 +37,7 @@ alias killsbt="ps aux|grep sbt |grep -v grep| awk '{print \$2}' |xargs kill -9"
 alias tess='tesseract stdin stdout -l deu -psm 1 --tessdata-dir /run/current-system/sw/share/tessdata < '
 alias mux='tmuxinator'
 alias mpvu='mpv --audio-device=alsa/iec958:CARD=X5,DEV=0'
+alias wallpaper='feh --bg-fill -z ~/.backgrounds/'
 
 rwhich() { readlink -e $(which $1) }
 
