@@ -13,11 +13,11 @@ export GPG_TTY
 unset SSH_AGENT_PID
 export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/gnupg/S.gpg-agent.ssh"
 
-# Base16 Shell
-if [ -d $ZSH_CUSTOM/base16-shell ]; then
-    BASE16_SHELL="$ZSH_CUSTOM/base16-shell/scripts/base16-twilight.sh"
-    [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
-fi
+## Base16 Shell
+# if [ -d $ZSH_CUSTOM/base16-shell ]; then
+#     BASE16_SHELL="$ZSH_CUSTOM/base16-shell/scripts/base16-twilight.sh"
+#     [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
+# fi
 
 restart() {
     tmuxinator stop $1 && sleep 1 && tmuxinator start $1
@@ -31,12 +31,10 @@ alias ec='emacsclient -c'
 alias e='emacsclient'
 alias mc='mc --colors="normal=white,black:header=white,red:menunormal=white,color90"'
 alias mvni='mvn install -DskipTests=true -T1C'
-#alias nixq="nix-env -qaP | grep -i"
 alias playr="mpv \"\$(find . -type f | perl -MList::Util=shuffle -e 'print shuffle(<STDIN>);' | tail -n 1)\""
 alias killsbt="ps aux|grep sbt |grep -v grep| awk '{print \$2}' |xargs kill -9"
 alias tess='tesseract stdin stdout -l deu -psm 1 --tessdata-dir /run/current-system/sw/share/tessdata < '
 alias mux='tmuxinator'
-alias pill-nas='PILL_OPTS="-Dpill.cli.endpoint=http://nas:10549" pill'
 alias mpvu='mpv --audio-device=alsa/iec958:CARD=X5,DEV=0'
 
 rwhich() { readlink -e $(which $1) }
