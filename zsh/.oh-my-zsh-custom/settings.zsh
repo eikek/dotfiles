@@ -8,16 +8,6 @@ export LESSCHARSET=utf-8
 export PERL_UTF8_LOCALE=1 PERL_UNICODE=AS
 export SBT_OPTS="-Xmx1024m"
 
-GPG_TTY=$(tty)
-export GPG_TTY
-unset SSH_AGENT_PID
-export SSH_AUTH_SOCK="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}/gnupg/S.gpg-agent.ssh"
-
-## Base16 Shell
-# if [ -d $ZSH_CUSTOM/base16-shell ]; then
-#     BASE16_SHELL="$ZSH_CUSTOM/base16-shell/scripts/base16-twilight.sh"
-#     [[ -s $BASE16_SHELL ]] && source $BASE16_SHELL
-# fi
 
 restart() {
     tmuxinator stop $1 && sleep 1 && tmuxinator start $1
