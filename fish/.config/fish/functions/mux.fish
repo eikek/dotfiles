@@ -1,0 +1,3 @@
+function mux
+    tmuxinator
+end
