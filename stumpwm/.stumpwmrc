@@ -562,11 +562,7 @@ frame according to the golden-ratio value."
 ;;   (load-module "modeline/battery-portable"))
 
 (defun battery-line ()
-  (if (or (equal hostname "nyx")
-          (equal hostname "lenni")
-          (equal hostname "kythira"))
-      "[B%B]"
-      ""))
+  (s-trim (exec "cat /sys/class/power_supply/BAT0/capacity" t)))
 
 (defun volume-muted? (&optional device channel)
   (let ((level (s-trim (exec (concat "amixer -D "
@@ -604,6 +600,7 @@ frame according to the golden-ratio value."
 (setf *mode-line-screen-position* :top)
 (setf *mode-line-frame-position* :top)
 (setf *mode-line-border-width* 0)
+(setf *mode-line-pad-y 25)
 (setf *mode-line-background-color* "black")
 (setf *mode-line-foreground-color* "orange")
 (setf *mode-line-border-color* "lightyellow")
@@ -612,13 +609,10 @@ frame according to the golden-ratio value."
 (setf *screen-mode-line-format*
       (list "^n"
             '(:eval (current-date))
-;            " ^2%c%l"
-;            '(:eval (volume))
             " "
-;            '(:eval (battery-line))
             " ^7%w"
             "^> ^5*"
-;            '(:eval (get-task-info))
+            '(:eval (concat "BAT: " (battery-line)))
             " ^n<"
             '(:eval (group-name (current-group)))
             ">"))
