@@ -1,3 +1,3 @@
 function mux
-    tmuxinator
+    tmuxinator $argv
 end
