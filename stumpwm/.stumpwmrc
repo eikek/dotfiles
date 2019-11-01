@@ -109,8 +109,7 @@ DISPLAY defines the display to use, default is ':1.0'."
 (define-key *root-map* (kbd "C-b") "ror-browser")
 (define-key *root-map* (kbd "C-f") "ror-firefox")
 (define-key *root-map* (kbd "C-c") "ror-chromium")
-(if (string= "n76" hostname)
-    (define-key *root-map* (kbd "C-d") "ror-idea"))
+(define-key *root-map* (kbd "C-d") "ror-idea")
 (define-key *root-map* (kbd "C-t") "ror-htop")
 (define-key *root-map* (kbd "C-F12") "exec nix-shell -p i3lock-fancy --run i3lock-fancy")
 
