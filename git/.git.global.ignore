@@ -2,6 +2,8 @@
 *.iml
 *.ipr
 .idea/
+.metals/
+.bloop/
 
 gh-pages/
 target/
