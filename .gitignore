@@ -4,3 +4,6 @@ liquidprompt/.liquidprompt/
 
 conkeror/.conkerorrc/local*
 /sbt/.sbt/0.13/plugins/*.local.sbt
+/sbt/.sbt/0.13/plugins/metals.sbt
+/sbt/.sbt/1.0/plugins/*.local.sbt
+/sbt/.sbt/1.0/plugins/metals.sbt
