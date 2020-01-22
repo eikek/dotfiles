@@ -41,5 +41,5 @@ remotehosteval = get_host_pass("email/posteo.de")
 remoteporteval = get_port_pass("email/posteo.de")
 remoteusereval = get_user_pass("email/posteo.de")
 remotepasseval = get_password_pass("email/posteo.de")
-cert_fingerprint = dd7dd9dca991a98a404629c8aadf088e6a36615edd1f408f2b1eebdc94c1f440732a8adb37899761485e33ebaaff418e77df4cf8f251039e8f86f84e818a9147
+cert_fingerprint = 0de9933662e6b739f335a8ac147037295fe7c4b5db3e6c55ac2162f682ca6305
 maxconnections = 1

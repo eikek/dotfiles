@@ -29,7 +29,7 @@ root: ~/workspace/projects/sharry
 
 windows:
   - sbt1:
-      - sbt "~ restserver/reStart"
+      - sbt
   - sbt2:
-      - sbt "~ compile"
+      - sbt
   - term:
