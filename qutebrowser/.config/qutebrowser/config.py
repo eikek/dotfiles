@@ -205,4 +205,20 @@ if socket.gethostname() == "kythira":
     c.zoom.default = '150%'
 else:
     c.zoom.default = '100%'
-    
+
+c.qt.args: ["blink-settings=darkMode=4"]
+c.colors.webpage.bg = "#aaa"
+#c.colors.webpage.force_dark_color_scheme = True
+#c.colors.webpage.prefers_color_scheme_dark = True
+
+import dracula.draw
+
+# Load existing settings made via :set
+config.load_autoconfig()
+
+dracula.draw.blood(c, {
+    'spacing': {
+        'vertical': 6,
+        'horizontal': 8
+    }
+})
