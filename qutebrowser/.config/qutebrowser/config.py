@@ -207,7 +207,7 @@ else:
     c.zoom.default = '100%'
 
 c.qt.args: ["blink-settings=darkMode=4"]
-c.colors.webpage.bg = "#aaa"
+c.colors.webpage.bg = "#eee"
 #c.colors.webpage.force_dark_color_scheme = True
 #c.colors.webpage.prefers_color_scheme_dark = True
 

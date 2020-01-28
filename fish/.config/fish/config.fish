@@ -17,3 +17,5 @@ function fish_vterm_prompt_end;
     printf '\e]51;A'(whoami)'@'(hostname)':'(pwd)'\e\\';
 end
 function track_directories --on-event fish_prompt; fish_vterm_prompt_end; end
+
+set -gx PATH ~/bin $PATH
