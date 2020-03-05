@@ -38,12 +38,13 @@ c.input.insert_mode.auto_leave = False
 #   - window: Open in a new window.
 c.new_instance_open_target = 'tab'
 
-c.url.default_page = 'https://start.duckduckgo.com/'
+c.url.default_page = 'https://start.duckduckgo.com'
+c.url.start_pages = ['http://eknet.org/dash/home']
 c.url.searchengines = {
     "DEFAULT": "https://duckduckgo.com/?q={}",
     "github": "https://github.com/search?q={}",
     "maven": "https://search.maven.org/search?q={}",
-    "scala": "https://www.scala-lang.org/api/2.12.8/?search={}",
+    "ascala": "https://www.scala-lang.org/api/2.12.8/?search={}",
     "dict": "https://www.dict.cc/?s={}"
 }
 
