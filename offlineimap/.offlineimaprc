@@ -1,34 +1,34 @@
 # -*- conf -*-
 
 [general]
-accounts = posteo
+accounts = posteo,gmx
 pythonfile = ~/.offlineimap.py
 socktimeout = 30
-
-[Account eknet]
-localrepository = eknet-local
-remoterepository = eknet-remote
-quick = 5
 
 [Account posteo]
 localrepository = posteo-local
 remoterepository = posteo-remote
 quick = 5
 
-[Repository eknet-local]
-type = Maildir
-localfolders = ~/Mail/eknet
+[Account gmx]
+localrepository = gmx-local
+remoterepository = gmx-remote
+quick = 5
 
-[Repository eknet-remote]
+[Repository gmx-local]
+type = Maildir
+localfolders = ~/Mail/gmx
+
+[Repository gmx-remote]
 type = IMAP
-ssl = no
-starttls = yes
-remotehosteval = get_host_pass("email/eknet.org")
-remoteporteval = get_port_pass("email/eknet.org")
-remoteusereval = get_user_pass("email/eknet.org")
-remotepasseval = get_password_pass("email/eknet.org")
-cert_fingerprint = 08D4899BBA7664025E868EFF4CAC9F2CA376020B
+ssl = yes
+remotehosteval = get_host_pass("email/gmx.de")
+remoteporteval = get_port_pass("email/gmx.de")
+remoteusereval = get_user_pass("email/gmx.de")
+remotepasseval = get_password_pass("email/gmx.de")
+cert_fingerprint = eafa9600296f528c99b167adb7c40bf4d6acdc3f59b5c8e047831e632a180841
 maxconnections = 1
+
 
 [Repository posteo-local]
 type = Maildir
