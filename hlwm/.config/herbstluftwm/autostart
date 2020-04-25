@@ -20,25 +20,35 @@ TERMINAL="alacritty"
 hc keybind $Mod-Shift-q spawn nix-shell -p i3lock-fancy --run i3lock-fancy
 hc keybind $Mod-Shift-r reload
 hc keybind $Mod-Shift-k close_and_remove
-hc keybind $Mod-Return spawn "${TERMINAL:-xterm}" # use your $TERMINAL with xterm as fallback
-hc keybind $Mod-e spawn emacs
-hc keybind $Mod-Shift-b spawn qutebrowser
+hc keybind $Mod-Return spawn  ~/.config/herbstluftwm/ror.sh alacritty alacritty
+hc keybind $Mod-Control-Return spawn alacritty
+hc keybind $Mod-e spawn ~/.config/herbstluftwm/ror.sh emacs emacs
+hc keybind $Mod-Control-e spawn emacsclient -c
 hc keybind $Mod-x spawn dmenu_run
 hc keybind $Mod-k
-hc keybind $Mod-t spawn alacritty --title htop --command htop
+hc keybind $Mod-h spawn alacritty --title htop --command htop
 
 # basic movement in tiling and floating mode
 # focusing clients
 hc keybind $Mod-Left  focus left
+hc keybind $Mod-n     focus left
 hc keybind $Mod-Down  focus down
+hc keybind $Mod-r     focus down
 hc keybind $Mod-Up    focus up
+hc keybind $Mod-g     focus up
 hc keybind $Mod-Right focus right
+hc keybind $Mod-t     focus right
+
 
 # moving clients in tiling and floating mode
 hc keybind $Mod-Shift-Left  shift left
+hc keybind $Mod-Alt-n       shift left
 hc keybind $Mod-Shift-Down  shift down
+hc keybind $Mod-Alt-r       shift down
 hc keybind $Mod-Shift-Up    shift up
+hc keybind $Mod-Alt-g       shift up
 hc keybind $Mod-Shift-Right shift right
+hc keybind $Mod-Alt-t       shift right
 
 # splitting frames
 # create an empty frame at the specified direction
@@ -56,9 +66,9 @@ hc keybind $Mod-Control-Right   resize right +$resizestep
 
 
 # layouting
-hc keybind $Mod-r remove
-hc keybind $Mod-s floating toggle
+hc keybind $Mod-d remove
 hc keybind $Mod-f fullscreen toggle
+#hc keybind $Mod-s floating toggle
 hc keybind $Mod-Shift-f set_attr clients.focus.floating toggle
 hc keybind $Mod-p pseudotile toggle
 # The following cycles through the available layouts within a frame, but skips
@@ -78,7 +88,6 @@ hc mousebind $Mod-Button3 resize
 # focus
 hc keybind $Mod-BackSpace   cycle_monitor
 hc keybind $Mod-Tab         cycle_all +1
-hc keybind $Mod-n           cycle_all +1
 hc keybind $Mod-Shift-Tab   cycle_all -1
 hc keybind $Mod-c cycle
 hc keybind $Mod-i jumpto urgent
@@ -95,8 +104,8 @@ hc set frame_border_width 3
 hc set frame_bg_transparent 1
 hc set frame_transparent_width 1
 hc set frame_gap 0
-hc set frame_padding -8
-hc set window_gap 8
+hc set frame_padding 0
+hc set window_gap 0
 hc set smart_window_surroundings off
 hc set smart_frame_surroundings off
 hc set mouse_recenter_gap 0
@@ -158,7 +167,7 @@ hc detect_monitors
 #panel=~/.config/herbstluftwm/panel.sh
 #[ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
 for monitor in $(hc list_monitors | cut -d: -f1) ; do
-    hc pad "$monitor" 22
+    hc pad "$monitor" 30
 done
 killall polybar
 polybar mainbar&
