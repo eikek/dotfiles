@@ -166,8 +166,10 @@ hc detect_monitors
 # find the panel
 #panel=~/.config/herbstluftwm/panel.sh
 #[ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
+killall polybar
+for monitor in $(polybar --list-monitors | cut -d: -f1); do
+    MONITOR="$monitor" polybar mainbar&
+done
 for monitor in $(hc list_monitors | cut -d: -f1) ; do
     hc pad "$monitor" 30
 done
-killall polybar
-polybar mainbar&
