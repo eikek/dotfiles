@@ -358,6 +358,11 @@ enable-click = true
 ; Default: true
 enable-scroll = false
 
+icon-default = ‣
+label-active = ✔ %name%
+label-active-background = #2a9
+label-active-underline = #f5a70a
+
 
 [settings]
 screenchange-reload = true
