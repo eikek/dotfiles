@@ -19,3 +19,5 @@ end
 function track_directories --on-event fish_prompt; fish_vterm_prompt_end; end
 
 set -gx PATH ~/bin $PATH
+
+starship init fish | source
