@@ -212,14 +212,14 @@ c.colors.webpage.bg = "#eee"
 #c.colors.webpage.force_dark_color_scheme = True
 #c.colors.webpage.prefers_color_scheme_dark = True
 
-import dracula.draw
+##import dracula.draw
 
 # Load existing settings made via :set
 config.load_autoconfig()
 
-dracula.draw.blood(c, {
-    'spacing': {
-        'vertical': 6,
-        'horizontal': 8
-    }
-})
+# dracula.draw.blood(c, {
+#     'spacing': {
+#         'vertical': 6,
+#         'horizontal': 8
+#     }
+# })
