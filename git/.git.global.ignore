@@ -4,6 +4,7 @@
 .idea/
 .metals/
 .bloop/
+.bsp/
 
 gh-pages/
 target/
