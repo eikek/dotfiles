@@ -7,7 +7,10 @@ root: ~/workspace/projects/sharry
 # socket_name: foo
 
 # Runs before everything. Use it to start daemons etc.
-# pre: ./mongodb3 &
+on_project_start:
+  - sudo systemctl start container@dbpostgres
+  - sudo systemctl start container@devmail
+
 
 # Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
 # pre_window: rbenv shell 2.0.0-p247
@@ -30,6 +33,7 @@ root: ~/workspace/projects/sharry
 windows:
   - sbt1:
       - sbt
-  - sbt2:
-      - sbt
-  - term:
+  - test:
+      root: ~/workspace/projects/sharry/local
+  - postgres:
+      - psql -h localhost -U dev sharrydev

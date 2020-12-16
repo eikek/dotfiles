@@ -7,7 +7,10 @@ root: ~/workspace/projects/docspell
 # socket_name: foo
 
 # Runs before everything. Use it to start daemons etc.
-# pre: ./mongodb3 &
+on_project_start:
+  - sudo systemctl start container@dbpostgres
+  - sudo systemctl start container@dbsolr
+  - sudo systemctl start container@devmail
 
 # Runs in each window and pane before window/pane specific commands. Useful for setting up interpreter versions.
 # pre_window: rbenv shell 2.0.0-p247
@@ -19,16 +22,24 @@ root: ~/workspace/projects/docspell
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
-# startup_window: 2
+startup_window: 1
 
 # Controls whether the tmux session should be attached to automatically. Defaults to true.
-attach: false
+attach: true
 
 # Runs after everything. Use it to attach to tmux with custom options etc.
 # post: tmux -CC attach -t bc1
 
 windows:
   - sbt1:
-      - sbt
+      - sbt -mem 2048 -jvm-debug 5005
   - test:
-      -
+      root: ~/workspace/projects/docspell/local
+  - postgres:
+      - psql -h localhost -U dev docspelldev
+  - website:
+      layout: main-vertical
+      panes:
+        - nix-shell website/shell.nix --run sbt
+        - nix-shell website/shell.nix --run "cd website/site && zola serve"
+        - nix-shell website/shell.nix --run "cd website && ./run-elm.sh"

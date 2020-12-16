@@ -36,6 +36,7 @@ TAGS
 # ensime
 .ensime_cache/
 .ensime
+metals.sbt
 
 # Emacs/Cask
 *.elc
