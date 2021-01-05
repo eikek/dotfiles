@@ -32,10 +32,11 @@ attach: true
 
 windows:
   - sbt1:
-      - sbt -mem 2048 -jvm-debug 5005
+      - sbt -mem 2048
   - test:
       root: ~/workspace/projects/docspell/local
   - postgres:
+      - set -xg PGPASSWORD dev
       - psql -h localhost -U dev docspelldev
   - website:
       layout: main-vertical
