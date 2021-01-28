@@ -4,6 +4,12 @@
 thing=$1
 shift
 
+REC_OPT=""
+if [ -f "$thing" ]; then
+    REC_OPT="-r"
+fi
+
 while (true); do
-    inotifywait -r -e close_write "$thing" && $@
+    inotifywait $REC_OPT -e close_write "$thing"
+    $@
 done
