@@ -32,7 +32,10 @@ attach: true
 
 windows:
   - sbt1:
+      - set -xg DOCSPELL_ENV dev
       - sbt -mem 2048
+  - webui:
+      - ./project/dev-ui-build.sh watch
   - test:
       root: ~/workspace/projects/docspell/local
   - postgres:
