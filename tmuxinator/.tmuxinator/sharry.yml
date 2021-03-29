@@ -32,8 +32,10 @@ attach: true
 
 windows:
   - sbt1:
-      - sbt
+      - set -xg JAVA_HOME $JDK11_HOME
+      - sbt -mem 2048 -java-home $JDK11_HOME
   - test:
       root: ~/workspace/projects/sharry/local
   - postgres:
+      - set -xg PGPASSWORD dev
       - psql -h localhost -U dev sharrydev

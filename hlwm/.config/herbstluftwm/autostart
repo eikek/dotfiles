@@ -19,13 +19,12 @@ TERMINAL="alacritty"
 
 hc keybind $Mod-Shift-q spawn nix-shell -p i3lock-fancy --run i3lock-fancy
 hc keybind $Mod-Shift-r reload
-hc keybind $Mod-Shift-k close_and_remove
+hc keybind $Mod-k close_and_remove
 hc keybind $Mod-Return spawn  ~/.config/herbstluftwm/ror.sh alacritty alacritty
 hc keybind $Mod-Control-Return spawn alacritty
 hc keybind $Mod-e spawn ~/.config/herbstluftwm/ror.sh emacs emacs
 hc keybind $Mod-Control-e spawn emacsclient -c
 hc keybind $Mod-x spawn dmenu_run
-hc keybind $Mod-k
 hc keybind $Mod-h spawn alacritty --title htop --command htop
 
 # basic movement in tiling and floating mode
@@ -60,9 +59,13 @@ hc keybind $Mod-Control-space split explode
 # resizing frames and floating clients
 resizestep=0.02
 hc keybind $Mod-Control-Left    resize left +$resizestep
+hc keybind $Mod-Control-n       resize left +$resizestep
 hc keybind $Mod-Control-Down    resize down +$resizestep
+hc keybind $Mod-Control-r       resize down +$resizestep
 hc keybind $Mod-Control-Up      resize up +$resizestep
+hc keybind $Mod-Control-g       resize up +$resizestep
 hc keybind $Mod-Control-Right   resize right +$resizestep
+hc keybind $Mod-Control-t       resize right +$resizestep
 
 
 # layouting
@@ -89,7 +92,6 @@ hc mousebind $Mod-Button3 resize
 hc keybind $Mod-BackSpace   cycle_monitor
 hc keybind $Mod-Tab         cycle_all +1
 hc keybind $Mod-Shift-Tab   cycle_all -1
-hc keybind $Mod-c cycle
 hc keybind $Mod-i jumpto urgent
 
 # theme
