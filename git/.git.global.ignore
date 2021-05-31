@@ -10,7 +10,7 @@ gh-pages/
 target/
 /project/metals.sbt
 # var/
-# node_modules/
+node_modules/
 
 .DS_Store
 .DS_Store?

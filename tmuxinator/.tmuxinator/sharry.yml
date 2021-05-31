@@ -32,7 +32,7 @@ attach: true
 
 windows:
   - sbt1:
-      - set -xg DOCSPELL_ENV dev
+      - set -xg SHARRY_ENV dev
       - set -xg JAVA_HOME $JDK11_HOME
       - sbt -mem 2048 -java-home $JDK11_HOME
   - webui:
