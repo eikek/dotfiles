@@ -143,7 +143,7 @@ label = %percentage_used%%
 
 [module/wlan]
 type = internal/network
-interface = wlp110s0
+interface = wlo1
 interval = 3.0
 
 format-connected = <ramp-signal> <label-connected>
@@ -166,7 +166,7 @@ ramp-signal-foreground = ${colors.foreground-alt}
 
 [module/eth]
 type = internal/network
-interface = enp109s0f1
+interface = enp2s0
 interval = 3.0
 
 format-connected-underline = #55aa55

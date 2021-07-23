@@ -175,3 +175,10 @@ done
 for monitor in $(hc list_monitors | cut -d: -f1) ; do
     hc pad "$monitor" 30
 done
+
+## Load frame config based on monitor detection
+screen_res=$(xrandr|grep -iw connected | cut -d' ' -f4)
+if [[ $screen_res == 3840x1600* ]]; then
+    frame_cfg="$(cat ~/.config/herbstluftwm/big-screen.frames)"
+    hc load "$frame_cfg"
+fi
