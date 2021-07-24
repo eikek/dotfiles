@@ -173,7 +173,7 @@ for monitor in $(polybar --list-monitors | cut -d: -f1); do
     MONITOR="$monitor" polybar mainbar&
 done
 for monitor in $(hc list_monitors | cut -d: -f1) ; do
-    hc pad "$monitor" 30
+    hc pad "$monitor" 28
 done
 
 ## Load frame config based on monitor detection
