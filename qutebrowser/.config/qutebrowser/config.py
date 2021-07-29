@@ -16,10 +16,9 @@ c.content.headers.accept_language = 'de-DE,de,en-US,en'
 c.content.headers.custom = {}
 c.content.headers.do_not_track = True
 c.content.headers.referer = 'same-domain'
-c.content.notifications = False
+c.content.notifications.enabled = False
 c.content.pdfjs = False
 c.content.user_stylesheets = []
-c.content.ssl_strict = False
 
 c.editor.command = ['emacsclient', '-c', '{file}']
 c.editor.encoding = 'utf-8'
@@ -87,7 +86,7 @@ c.bindings.commands['normal'] = {
     # Commands
     '<alt-x>': 'set-cmd-text :',
     ':': 'set-cmd-text :',
-    '<ctrl-x>b': 'set-cmd-text -s :buffer',
+    '<ctrl-x>b': 'set-cmd-text -s :tab-select',
     '<ctrl-x>k': 'close',
     'q': 'tab-close',
     '<ctrl-x><ctrl-c>': 'quit',
@@ -145,7 +144,7 @@ c.bindings.commands['normal'] = {
     '<alt-backspace>': 'fake-key <Ctrl-Backspace>',
     '<ctrl-y>': 'insert-text {clipboard}',
     '<alt-w>': 'fake-key <ctrl-c>',
-    'i': 'enter-mode insert',
+    'i': 'mode-enter insert',
 
     # Numbers
     # https://github.com/qutebrowser/qutebrowser/issues/4213
@@ -176,18 +175,18 @@ c.bindings.commands['command'] = {
     '<alt-n>': 'command-history-next',
 
     # escape hatch
-    '<ctrl-g>': 'leave-mode',
+    '<ctrl-g>': 'mode-leave',
 }
 
 c.bindings.commands['hint'] = {
     # escape hatch
-    '<ctrl-g>': 'leave-mode',
+    '<ctrl-g>': 'mode-leave',
 }
 
 
 c.bindings.commands['caret'] = {
     # escape hatch
-    '<ctrl-g>': 'leave-mode',
+    '<ctrl-g>': 'mode-leave',
 }
 
 c.bindings.commands['insert'] = {
