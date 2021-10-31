@@ -43,7 +43,7 @@ windows:
       - set -xg PGPASSWORD dev
       - psql -h localhost -U dev docspelldev
   - website:
-      layout: main-vertical
+      layout: vertical
       panes:
         - nix-shell website/shell.nix --run sbt
         - nix-shell website/shell.nix --run "cd website/site && zola serve"

@@ -111,6 +111,11 @@ hc set window_gap 4
 hc set smart_window_surroundings off
 hc set smart_frame_surroundings off
 hc set mouse_recenter_gap 0
+hc set default_frame_layout vertical
+# hc substitute ALGO settings.default_frame_layout \
+#     foreach T tags.by-name. \
+#     sprintf ATTR '%c.tiling.root.algorithm' T \
+#     set_attr ATTR ALGO
 
 hc attr theme.active.color '#9fbc00'
 hc attr theme.normal.color '#454545'

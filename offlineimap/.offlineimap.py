@@ -9,7 +9,7 @@ def get_password_pass(name):
     return call_pass(name).split('\n', 1)[0]
 
 def get_user_pass(name):
-    return call_pass(name).split('\n', 2)[1]
+    return findValue('user', call_pass(name).split('\n'))
 
 def byKey(key):
     return lambda x: x.startswith(key + ':')
