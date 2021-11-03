@@ -18,7 +18,7 @@ function fish_vterm_prompt_end;
 end
 function track_directories --on-event fish_prompt; fish_vterm_prompt_end; end
 
-if test (hostname) = "Eikes-MBP.home"
+if test (string match "Eikes*" (hostname))
     source $HOME/.config/fish/work.fish
 end
 

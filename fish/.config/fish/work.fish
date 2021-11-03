@@ -14,3 +14,4 @@ set -gx SBT_OPTS "-Xms512M -Xmx4G -Xss32M -Duser.timezone=GMT"
 set -gx AWS_DEFAULT_REGION eu-west-1
 set -gx AWS_HOME /home/(whoami)/.aws
 set -gx AWS_REGION eu-west-1
+set -gx DYNAMO_ENDPOINT "http://localhost:8000"
