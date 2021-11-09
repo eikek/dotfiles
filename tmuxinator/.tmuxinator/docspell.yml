@@ -34,7 +34,7 @@ windows:
   - sbt1:
       - set -xg DOCSPELL_ENV dev
       - set -xg JAVA_HOME $JDK11_HOME
-      - sbt -mem 2048 -java-home $JDK11_HOME
+      - sbt11
   - webui:
       - ./project/dev-ui-build.sh watch
   - test:
