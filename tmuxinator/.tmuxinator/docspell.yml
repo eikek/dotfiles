@@ -36,7 +36,10 @@ windows:
       - set -xg JAVA_HOME $JDK11_HOME
       - sbt11
   - webui:
-      - ./project/dev-ui-build.sh watch
+      layout: vertical
+      panes:
+        - ./project/dev-ui-build.sh watch-js
+        - ./project/dev-ui-build.sh watch-css
   - test:
       root: ~/workspace/projects/docspell/local
   - postgres:
