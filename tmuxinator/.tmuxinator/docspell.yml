@@ -48,6 +48,6 @@ windows:
   - website:
       layout: vertical
       panes:
-        - nix-shell website/shell.nix --run sbt
+        - sleep 10 ; nix-shell website/shell.nix --run sbt
         - nix-shell website/shell.nix --run "cd website/site && zola serve"
         - nix-shell website/shell.nix --run "cd website && ./run-elm.sh"
