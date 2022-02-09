@@ -22,5 +22,6 @@ if test (string match "Eikes*" (hostname)); or test (string match "tundra" (whoa
     source $HOME/.config/fish/work.fish
 end
 
+fish_add_path "$HOME/.local/share/coursier/bin"
 
 starship init fish | source

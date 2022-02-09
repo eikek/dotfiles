@@ -5,11 +5,11 @@ if test (string match "Eikes*" (hostname))
     set -gx NIX_PROFILES "/nix/var/nix/profiles/default $HOME/.nix-profile"
     set -gx MANPATH "$HOME/.nix-profile/share/man" $MANPATH
     set -gx PATH ~/bin ~/.nix-profile/bin /opt/homebrew/bin $PATH
+
+    dsc generate-completions --shell fish | source
 end
 
-dsc generate-completions --shell fish | source
-
-set -gx SBT_OPTS "-Xms512M -Xmx4G -Xss32M -Duser.timezone=GMT"
+set -gx SBT_OPTS "-Xms512M -Xmx4G -Xss32M -Duser.timezone=UTC"
 set -gx AWS_DEFAULT_REGION eu-west-1
 set -gx AWS_HOME /home/(whoami)/.aws
 set -gx AWS_REGION eu-west-1
