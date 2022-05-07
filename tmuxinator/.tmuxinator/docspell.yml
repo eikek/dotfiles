@@ -50,4 +50,5 @@ windows:
       panes:
         - sleep 10 ; nix-shell website/shell.nix --run sbt
         - nix-shell website/shell.nix --run "cd website/site && zola serve"
-        - nix-shell website/shell.nix --run "cd website && ./run-elm.sh"
+        - nix-shell website/shell.nix --run "cd website && ./scripts/run-elm.sh"
+        - nix-shell website/shell.nix --run "cd website && ./scripts/run-styles.sh --watch"
