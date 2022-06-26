@@ -34,9 +34,12 @@ windows:
   - sbt1:
       - set -xg SHARRY_ENV dev
       - set -xg JAVA_HOME $JDK11_HOME
-      - sbt -mem 2048 -java-home $JDK11_HOME
+      - sbt11 -mem 2048
   - webui:
-      - ./project/dev-ui-build.sh watch
+      layout: vertical
+      panes:
+        - ./project/dev-ui-build.sh watch-js
+        - ./project/dev-ui-build.sh watch-css
   - test:
       root: ~/workspace/projects/sharry/local
   - postgres:
