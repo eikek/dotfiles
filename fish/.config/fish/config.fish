@@ -18,7 +18,7 @@ function fish_vterm_prompt_end;
 end
 function track_directories --on-event fish_prompt; fish_vterm_prompt_end; end
 
-if test (string match "Eikes*" (hostname)); or test (string match "tundra" (whoami));
+if test (string match "*MBP.home" (hostname)); or test (string match "ek*" (whoami));
     source $HOME/.config/fish/work.fish
 end
 
