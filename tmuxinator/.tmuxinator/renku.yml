@@ -30,7 +30,7 @@ attach: true
 
 windows:
   - sbt:
-      - sbt
+      - sbt -mem 4096
   - test:
       - cd local
   - postgres:
