@@ -1,11 +1,11 @@
-if test (string match "*MBP.home" (hostname))
+if test (string match "sdsc" (whoami)); or test (string match "ek*" (whoami));
     set -xg SSH_AUTH_SOCK /Users/ekettner/.gnupg/S.gpg-agent.ssh
-    set -gx NIX_SSL_CERT_FILE "$HOME/.nix-profile/etc/ssl/certs/ca-bundle.crt"
-    set -gx NIX_PATH "$HOME/.nix-defexpr/channels"
+    set -gx NIX_SSL_CERT_FILE "/nix/var/nix/profiles/default/etc/ssl/certs/ca-bundle.crt"
     set -gx NIX_PROFILES "/nix/var/nix/profiles/default $HOME/.nix-profile"
     set -gx MANPATH "$HOME/.nix-profile/share/man" $MANPATH
-    set -gx PATH ~/bin ~/.nix-profile/bin /nix/var/nix/profiles/default/bin /opt/homebrew/bin $PATH
+    set -gx PATH ~/bin ~/.nix-profile/bin /nix/var/nix/profiles/default/bin $PATH
 
+    source ~/.config/fish/direnv.fish
 #    dsc generate-completions --shell fish | source
 end
 

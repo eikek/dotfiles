@@ -18,10 +18,12 @@ function fish_vterm_prompt_end;
 end
 function track_directories --on-event fish_prompt; fish_vterm_prompt_end; end
 
-if test (string match "*MBP.home" (hostname)); or test (string match "ek*" (whoami));
+if test (string match "sdsc" (whoami)); or test (string match "ek*" (whoami));
     source $HOME/.config/fish/work.fish
 end
 
-fish_add_path "$HOME/.local/share/coursier/bin"
+fish_add_path "~/.local/share/coursier/bin"
 
 starship init fish | source
+
+set -xg EDITOR emacsclient
