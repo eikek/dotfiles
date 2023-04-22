@@ -34,7 +34,7 @@ window:
   decorations: none
 
   # Background opacity
-  opacity: 0.8
+  opacity: 0.95
 
 
 ## Removed from source
