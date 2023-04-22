@@ -22,10 +22,10 @@ on_project_start:
 # tmux_command: byobu
 
 # Specifies (by name or index) which window will be selected on project startup. If not set, the first window is used.
-startup_window: 1
+#startup_window: 1
 
 # Controls whether the tmux session should be attached to automatically. Defaults to true.
-attach: true
+#attach: true
 
 # Runs after everything. Use it to attach to tmux with custom options etc.
 # post: tmux -CC attach -t bc1
@@ -36,7 +36,7 @@ windows:
       - set -xg JAVA_HOME $JDK11_HOME
       - sbt11 -mem 2048
   - webui:
-      layout: vertical
+      layout: even-vertical
       panes:
         - ./project/dev-ui-build.sh watch-js
         - ./project/dev-ui-build.sh watch-css

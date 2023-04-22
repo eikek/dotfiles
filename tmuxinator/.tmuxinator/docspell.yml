@@ -36,7 +36,7 @@ windows:
       - set -xg JAVA_HOME $JDK11_HOME
       - sbt11
   - webui:
-      layout: vertical
+      layout: even-vertical
       panes:
         - ./project/dev-ui-build.sh watch-js
         - ./project/dev-ui-build.sh watch-css
@@ -46,7 +46,7 @@ windows:
       - set -xg PGPASSWORD dev
       - psql -h localhost -U dev docspelldev
   - website:
-      layout: vertical
+      layout: even-vertical
       panes:
         - sleep 10 ; nix-shell website/shell.nix --run sbt
         - nix-shell website/shell.nix --run "cd website/site && zola serve"
