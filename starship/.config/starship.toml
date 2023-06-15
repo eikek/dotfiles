@@ -7,12 +7,3 @@ add_newline=true
 
 [kubernetes]
 disabled = false
-detect_files = ['k8s']
-format = 'on [⛵ ($user on )($cluster in )$context \($namespace\)](dimmed green) '
-[kubernetes.context_aliases]
-'dev.local.cluster.k8s' = 'dev'
-'.*/openshift-cluster/.*' = 'openshift'
-'gke_.*_(?P<var_cluster>[\w-]+)' = 'gke-$var_cluster'
-[kubernetes.user_aliases]
-'dev.local.cluster.k8s' = 'dev'
-'root/.*' = 'root'
