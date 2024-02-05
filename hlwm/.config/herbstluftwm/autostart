@@ -173,6 +173,10 @@ hc detect_monitors
 # find the panel
 #panel=~/.config/herbstluftwm/panel.sh
 #[ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
+# get network device names
+export WIFI=$(iw dev | grep Interface | cut -d' ' -f2 | xargs)
+#export ETH=$()
+
 killall polybar
 for monitor in $(polybar --list-monitors | cut -d: -f1); do
     MONITOR="$monitor" polybar mainbar&
