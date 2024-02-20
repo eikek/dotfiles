@@ -22,7 +22,9 @@ if test (string match "sdsc" (whoami)); or test (string match "ek*" (whoami));
     source $HOME/.config/fish/work.fish
 end
 
-fish_add_path "~/.local/share/coursier/bin"
+if test -d "$HOME/.local/share/coursier/bin";
+    fish_add_path "$HOME/.local/share/coursier/bin"
+end
 
 starship init fish | source
 
