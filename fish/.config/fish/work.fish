@@ -5,7 +5,6 @@ if test (string match "sdsc" (whoami)); or test (string match "ek*" (whoami));
     set -gx MANPATH "$HOME/.nix-profile/share/man" $MANPATH
     set -gx PATH ~/bin ~/.nix-profile/bin /nix/var/nix/profiles/default/bin $PATH
 
-#    source ~/.config/fish/direnv.fish
 #    dsc generate-completions --shell fish | source
 end
 
