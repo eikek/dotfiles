@@ -37,8 +37,8 @@ module-margin-right = 2
 ;; Font declaration
 font-0 = Anonymous Pro:weight=bold:pixelsize=18;1
 font-1 = unifont:fontformat=truetype:size=12;0
-;;font-1 = FontAwesome:style=Regular:pixelsize=26
-font-2 = siji:size=36;1
+font-2 = Hack Nerd Font Mono:pixelsize=16
+font-3 = siji:size=36;1
 
 modules-left = date ewmh
 modules-center =  xwindow
