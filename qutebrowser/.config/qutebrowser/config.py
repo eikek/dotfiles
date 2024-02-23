@@ -124,10 +124,9 @@ c.bindings.commands['normal'] = {
     ';r': 'hint --rapid links tab-bg',
 
     # history
-    '<ctrl-]>': 'forward',
-    '<ctrl-[>': 'back',
     'l': 'back',
     'B': 'back',
+    '<alt-Left>': 'back',
     'F': 'forward',
 
     # editing
@@ -160,7 +159,7 @@ c.bindings.commands['normal'] = {
     '0': 'fake-key 0',
 
     # escape hatch
-    '<ctrl-h>': 'set-cmd-text -s :help',
+    '<ctrl-h>': 'cmd-set-text -s :help',
     '<ctrl-g>': ESC_BIND,
 }
 
