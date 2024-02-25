@@ -38,7 +38,7 @@ c.input.insert_mode.auto_leave = False
 c.new_instance_open_target = 'tab'
 
 c.url.default_page = 'https://start.duckduckgo.com'
-c.url.start_pages = ['http://eknet.org/dash/home']
+c.url.start_pages = ['http://home.home']
 c.url.searchengines = {
     "DEFAULT": "https://duckduckgo.com/?q={}",
     "github": "https://github.com/search?q={}",
@@ -209,6 +209,7 @@ c.qt.args: ["blink-settings=darkMode=4"]
 c.colors.webpage.bg = "#eee"
 #c.colors.webpage.force_dark_color_scheme = True
 #c.colors.webpage.prefers_color_scheme_dark = True
+c.colors.webpage.preferred_color_scheme = "dark"
 
 ##import dracula.draw
 
