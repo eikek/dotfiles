@@ -1,6 +1,6 @@
 [user]
-	name = Eike Kettner
-	email = eike.kettner@posteo.de
+	name = Eike
+	email = eikek@posteo.de
 [core]
 	excludesfile = ~/.git.global.ignore
 	autocrlf = input
@@ -18,3 +18,5 @@
 	required = true
 [github]
 	user = eikek
+[blame]
+	ignoreRevsFile = .git-blame-ignore-revs
