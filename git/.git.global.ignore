@@ -45,5 +45,6 @@ metals.sbt
 # unversioned things
 unversioned/
 /local
+local.sbt
 .direnv/
 .scala-build/
