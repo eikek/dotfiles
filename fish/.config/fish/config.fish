@@ -1,6 +1,5 @@
 # fish init
 
-
 # from here: https://github.com/fish-shell/fish-shell/issues/602
 function reverse_history_search
   history | fzf --no-sort --height 50% --layout reverse | read -l command
