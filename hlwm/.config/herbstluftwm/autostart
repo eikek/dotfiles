@@ -174,8 +174,8 @@ hc detect_monitors
 #panel=~/.config/herbstluftwm/panel.sh
 #[ -x "$panel" ] || panel=/etc/xdg/herbstluftwm/panel.sh
 # get network device names
-export WIFI=$(iw dev | grep Interface | cut -d' ' -f2 | xargs)
-export ETH=$(ip link | grep enp | head -n1 | cut -d':' -f2 | xargs)
+export WIFI=$(ip link | grep -w "state UP" | grep ": w" | cut -d':' -f2|xargs)
+export ETH=$(ip link | grep -w "state UP" | grep ": e" | cut -d':' -f2|xargs)
 
 killall polybar
 for monitor in $(polybar --list-monitors | cut -d: -f1); do

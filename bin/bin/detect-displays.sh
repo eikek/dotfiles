@@ -39,3 +39,4 @@ done
 set -x
 ${CMD}
 set +x
+herbstclient reload

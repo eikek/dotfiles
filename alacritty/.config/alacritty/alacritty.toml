@@ -49,7 +49,7 @@ foreground = "0xeaeaea"
 TERM = "xterm-256color"
 
 [font]
-size = 11.0
+size = 9.0
 
 [font.bold]
 family = "AnonymousPro"
