@@ -7,3 +7,7 @@ add_newline=true
 
 [kubernetes]
 disabled = false
+
+
+[nix_shell]
+disabled = true

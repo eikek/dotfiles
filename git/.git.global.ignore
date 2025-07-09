@@ -6,6 +6,8 @@
 .bloop/
 .bsp/
 
+out/
+
 gh-pages/
 target/
 /project/metals.sbt
