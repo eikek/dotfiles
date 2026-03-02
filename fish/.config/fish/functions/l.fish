@@ -1,3 +1,3 @@
 function l
-    exa -lha --git $argv
+    exa -lha $argv
 end
