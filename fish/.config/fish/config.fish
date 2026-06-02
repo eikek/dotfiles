@@ -28,3 +28,5 @@ end
 starship init fish | source
 
 set -xg EDITOR emacsclient
+
+bind alt-backspace backward-kill-word
