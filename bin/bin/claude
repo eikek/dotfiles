@@ -1,0 +1,8 @@
+#!/usr/bin/env -S env NIXPKGS_ALLOW_UNFREE=1 nix
+#! nix develop --impure --expr ``(let cwd = builtins.getEnv "PWD"; aiJail = builtins.getFlake "github:akitaonrails/ai-jail"; flake = builtins.getFlake "git+file://${cwd}"; system = builtins.currentSystem; pkgs = import <nixpkgs> { inherit system; config.allowUnfree = true; }; in pkgs.mkShell { inputsFrom = [ flake.devShells.${system}.default ]; packages = [ pkgs.git pkgs.bash pkgs.claude-code pkgs.eza aiJail.packages.${system}.default ]; })`` --command bash
+
+# nix develop creates a new tempdir but inside ai-jail it is /tmp
+export TMPDIR=/tmp
+
+
+ai-jail --worktree claude
