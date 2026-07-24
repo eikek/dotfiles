@@ -24,7 +24,8 @@ hc keybind $Mod-Return spawn  ~/.config/herbstluftwm/ror.sh alacritty alacritty
 hc keybind $Mod-Control-Return spawn alacritty
 hc keybind $Mod-e spawn ~/.config/herbstluftwm/ror.sh emacs emacs
 hc keybind $Mod-Control-e spawn emacsclient -c
-hc keybind $Mod-x spawn dmenu_run
+hc keybind $Mod-x spawn rofi -show run
+hc keybind $Mod-w spawn rofi -show window
 hc keybind $Mod-h spawn alacritty --title htop --command htop
 
 # basic movement in tiling and floating mode
@@ -147,6 +148,8 @@ done
 # cycle through tags
 hc keybind $Mod-period use_index +1 --skip-visible
 hc keybind $Mod-comma  use_index -1 --skip-visible
+hc keybind $Mod-Shift-period move_index +1
+hc keybind $Mod-Shift-comma move_index -1
 
 
 # rules
