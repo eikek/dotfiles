@@ -26,6 +26,7 @@ if test -d "$HOME/.local/share/coursier/bin";
 end
 
 starship init fish | source
+fzf --fish | source
 
 set -xg EDITOR emacsclient
 
