@@ -5,4 +5,4 @@
 export TMPDIR=/tmp
 
 
-ai-jail --worktree --rw-map /home/eike/.pi --map /home/eike/.keys --network pi "$@"
+ai-jail --worktree --rw-map /home/eike/.pi --ro-map /home/eike/.keys --network pi "$@"
