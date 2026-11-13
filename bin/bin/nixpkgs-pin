@@ -6,7 +6,7 @@
 #
 set -euo pipefail
 PIN_DIR="${NIXPKGS_PIN_DIR:-$HOME/.config/nixpkgs-pin}"
-PIN_LOCK="$PIN_DIR/flake.lock"
+PIN_LOCK="$(realpath "$PIN_DIR/flake.lock")"
 TACK_LOCK=".tack/pins.lock.json"
 
 die() { echo "$*" >&2; exit 1; }
