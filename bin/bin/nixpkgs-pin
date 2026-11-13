@@ -1,0 +1,152 @@
+#!/usr/bin/env bash
+#
+# Sync nixpkgs lock with the one maintained in ~/.config/nixpkgs-pin. This can
+# make every flake on the system link to the same revision of nixpkgs and thus
+# avoid the many copies that would otherwise exist in the nix store.
+#
+set -euo pipefail
+PIN_DIR="${NIXPKGS_PIN_DIR:-$HOME/.config/nixpkgs-pin}"
+PIN_LOCK="$PIN_DIR/flake.lock"
+TACK_LOCK=".tack/pins.lock.json"
+
+die() { echo "$*" >&2; exit 1; }
+
+pin_locked() { jq -c '.nodes.nixpkgs.locked' "$PIN_LOCK"; }
+
+# rewrite a JSON file in place with a jq filter
+jq_inplace() {
+  local file=$1; shift
+  local tmp; tmp=$(mktemp)
+  jq "$@" "$file" > "$tmp" && mv "$tmp" "$file"
+}
+
+# ---- flake.lock -----------------------------------------------------------
+
+flake_node() {
+  jq -r --arg i "$1" '.nodes.root.inputs[$i] | strings' flake.lock
+}
+
+# print the project's locked entry; return 1 if the input isn't in flake.lock
+flake_get() {
+  local input=$1 node pin_orig proj_orig
+  node=$(flake_node "$input")
+  [ -n "$node" ] || return 1
+  pin_orig=$(jq -cS '.nodes.nixpkgs.original' "$PIN_LOCK")
+  proj_orig=$(jq -cS --arg n "$node" '.nodes[$n].original' flake.lock)
+  [ "$pin_orig" = "$proj_orig" ] ||
+    die "flake input '$input' doesn't match the pin:
+  pin:     $pin_orig
+  project: $proj_orig"
+  jq -c --arg n "$node" '.nodes[$n].locked' flake.lock
+}
+
+flake_set() {
+  local input=$1 locked=$2 node
+  node=$(flake_node "$input")
+  jq_inplace flake.lock --arg n "$node" --argjson l "$locked" '.nodes[$n].locked = $l'
+  nix flake lock   # sanity check: no-op if Nix accepts the lock
+}
+
+# ---- .tack/pins.lock.json -------------------------------------------------
+
+tack_get() {
+  local input=$1 declared expected
+  jq -e --arg i "$input" '.[$i] | objects' "$TACK_LOCK" >/dev/null || return 1
+  declared=$(nix eval --impure --json --expr \
+      'builtins.fromTOML (builtins.readFile ./.tack/pins.toml)' |
+    jq -r --arg i "$input" '.inputs[$i] | if type == "string" then . else .url // empty end')
+  expected=$(jq -r '.nodes.nixpkgs.original | "\(.type):\(.owner)/\(.repo)/\(.ref)"' "$PIN_LOCK")
+  [ "$declared" = "$expected" ] ||
+    die "tack input '$input' doesn't match the pin:
+  pin:     $expected
+  project: ${declared:-<not found in .tack/pins.toml>}"
+  jq -c --arg i "$input" '.[$i]' "$TACK_LOCK"
+}
+
+tack_set() {
+  local input=$1 locked=$2
+  jq_inplace "$TACK_LOCK" --arg i "$input" --argjson l "$locked" '.[$i] = $l'
+  # sanity check: forces the fetch and verifies the narHash
+  nix eval --impure --raw --expr "toString (import ./.tack).${input}" >/dev/null
+}
+
+# ---- project detection ----------------------------------------------------
+
+# prints "tack" or "flake", whichever lock holds the input in this project
+project_kind() {
+  if [ -f "$TACK_LOCK" ]; then
+    echo tack
+  elif [ -f flake.nix ]; then
+    [ -f flake.lock ] || nix flake lock >&2
+    echo flake
+  else
+    die "no flake.nix or $TACK_LOCK here"
+  fi
+}
+
+field() { jq -r ".$1" <<<"$2"; }
+short() { field rev "$1" | cut -c1-12; }
+date_of() { date -d "@$(field lastModified "$1")" +%F; }
+
+# ---- commands -------------------------------------------------------------
+
+cmd_sync() {
+  local input=$1 force=$2 kind cur pin
+  kind=$(project_kind)
+  cur=$("${kind}_get" "$input") || die "no $kind input '$input' found here"
+  pin=$(pin_locked)
+
+  if [ "$(field rev "$cur")" = "$(field rev "$pin")" ]; then
+    echo "$kind: $input already at $(short "$pin")"
+    return
+  fi
+
+  if [ "$(field lastModified "$cur")" -gt "$(field lastModified "$pin")" ] && [ -z "$force" ]; then
+    cat >&2 <<MSG
+$kind: $input in this project is NEWER than your pin, leaving it alone:
+  project: $(short "$cur") ($(date_of "$cur"))
+  pin:     $(short "$pin") ($(date_of "$pin"))
+Either
+  nixpkgs-pin adopt      # take the project's revision into your pin
+  nixpkgs-pin update     # bump your pin to the latest, then sync again
+or 'nixpkgs-pin sync --force' to downgrade the project to your pin.
+MSG
+    exit 2
+  fi
+
+  "${kind}_set" "$input" "$pin"
+  echo "$kind: $input $(short "$cur") -> $(short "$pin")"
+}
+
+cmd_adopt() {
+  local input=$1 kind cur pin
+  kind=$(project_kind)
+  cur=$("${kind}_get" "$input") || die "no $kind input '$input' found here"
+  pin=$(pin_locked)
+  if [ "$(field lastModified "$cur")" -le "$(field lastModified "$pin")" ]; then
+    echo "pin is already at $(short "$pin") ($(date_of "$pin")), not older than the project; nothing to adopt"
+    return
+  fi
+  jq_inplace "$PIN_LOCK" --argjson l "$cur" '.nodes.nixpkgs.locked = $l'
+  echo "pin: $(short "$pin") -> $(short "$cur") ($(date_of "$cur"))"
+}
+
+force=
+args=()
+for a in "$@"; do
+  case "$a" in
+    -f|--force) force=1 ;;
+    *) args+=("$a") ;;
+  esac
+done
+set -- "${args[@]}"
+
+case "${1:-}" in
+  update)
+    nix flake update --flake "$PIN_DIR"
+    jq -r '.nodes.nixpkgs.locked.rev' "$PIN_LOCK"
+    ;;
+  sync)  cmd_sync  "${2:-nixpkgs}" "$force" ;;
+  adopt) cmd_adopt "${2:-nixpkgs}" ;;
+  *) die "usage: nixpkgs-pin update | sync [--force] [input] | adopt [input]" ;;
+esac
