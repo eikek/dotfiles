@@ -26,7 +26,7 @@ remotehosteval = get_host_pass("email/gmx.de")
 remoteporteval = get_port_pass("email/gmx.de")
 remoteusereval = get_user_pass("email/gmx.de")
 remotepasseval = get_password_pass("email/gmx.de")
-cert_fingerprint = 1078a4770df211fff19fc27037637aedd45e5f6919998d66d860bac1251b9527
+cert_fingerprint = 3a5b30524886686556d457346b4b55ea44ede882fcbf79d78a2d05b104a556e4
 maxconnections = 1
 
 
