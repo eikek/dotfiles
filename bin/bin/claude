@@ -5,4 +5,4 @@
 export TMPDIR=/tmp
 
 
-ai-jail --worktree --rw-map /home/eike/.claude  --network --inherit-env claude
+ai-jail --worktree --rw-map /home/eike/.claude --inherit-env  --network claude
