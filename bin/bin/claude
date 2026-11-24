@@ -5,4 +5,4 @@
 export TMPDIR=/tmp
 
 
-ai-jail --worktree --rw-map /home/eike/.claude --ro-map /nix --ro-map /run --env PATH claude
+ai-jail --worktree --rw-map /home/eike/.claude --ro-map /nix --ro-map /run --env PATH --network claude
