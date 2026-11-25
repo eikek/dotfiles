@@ -1,4 +1,6 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-  outputs = _: { };
+  outputs = {nixpkgs, ...}: {
+    legacyPackages = nixpkgs.legacyPackages;
+  };
 }

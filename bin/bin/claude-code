@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+NIXPKGS_ALLOW_UNFREE=1
+export NIXPKGS_ALLOW_UNFREE
+
+FLAKE="$HOME/.config/nixpkgs-pin"
+
+nixbin="$(readlink $(which nix))"
+nixpath="$(dirname $nixbin)"
+export PATH="$nixpath":${PATH}
+
+exec ai-jail --env PATH --env NIXPKGS_ALLOW_UNFREE \
+  --network --map ~/.claude.json --map ~/.claude --map /nix/store \
+  --map "$nixpath" --map ~/.config/nixpkgs-pin -- \
+  nix shell --impure "$FLAKE#legacyPackages.x86_64-linux.claude-code" --command claude "$@"
